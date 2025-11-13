@@ -69,10 +69,10 @@ public class ClaimService {
 
         lastClaimTime.put(player.getUniqueId(), now);
 
-        if (plugin.getNconfig().isDatabaseEnabled()) {
-            plugin.getDatabaseManager().saveClaim(Claim.getClaim(chunk));
-            plugin.getDatabaseManager().saveUser(user);
-        }
+
+        plugin.getDatabaseManager().saveClaim(Claim.getClaim(chunk));
+        plugin.getDatabaseManager().saveUser(user);
+
     }
 
     public void buyLand(@NotNull Claim claim, Player player, @NotNull Chunk chunk, boolean isAdmin) {
@@ -121,10 +121,10 @@ public class ClaimService {
 
         claim.getLands().add(chunkKey);
 
-        if (plugin.getNconfig().isDatabaseEnabled()) {
-            plugin.getDatabaseManager().saveClaim(claim);
-            plugin.getDatabaseManager().saveUser(user);
-        }
+
+        plugin.getDatabaseManager().saveClaim(claim);
+        plugin.getDatabaseManager().saveUser(user);
+
 
         ChannelType.CHAT.send(player, plugin.getLangManager().getString("claim.land.expanded"));
     }
@@ -248,7 +248,7 @@ public class ClaimService {
     }
 
     private void createNewClaim(Player player, Chunk chunk) {
-        String claimId = generateClaimId(chunk);
+        UUID claimId = UUID.randomUUID();
         Date createdAt = new Date();
         Date expiredAt = calculateExpirationDate();
         Location claimBlockLocation = player.getLocation().getBlock().getLocation();
@@ -299,10 +299,6 @@ public class ClaimService {
 
         User.getUser(player.getUniqueId()).getPlayerClaims().add(claim);
         ChannelType.CHAT.send(player, plugin.getLangManager().getString("claim.received"));
-    }
-
-    private String generateClaimId(Chunk chunk) {
-        return chunk.getWorld().getName() + "_" + chunk.getX() + "_" + chunk.getZ();
     }
 
     private Date calculateExpirationDate() {

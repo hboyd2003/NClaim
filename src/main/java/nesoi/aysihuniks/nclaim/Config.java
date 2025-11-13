@@ -131,7 +131,6 @@ public class Config {
 
         setAutoSave(config.getInt("auto_save", 30));
 
-        setDatabaseEnabled(config.getBoolean("database.enable", false));
         setDatabaseType(config.getString("database.type", "sqlite"));
         setSqliteFile(config.getString("database.sqlite.file", "database.db"));
         setMysqlHost(config.getString("database.mysql.host", "localhost"));
@@ -208,7 +207,6 @@ public class Config {
 
             config.set("auto_save", getAutoSave());
 
-            config.set("database.enable", isDatabaseEnabled());
             config.set("database.type", getDatabaseType());
             config.set("database.sqlite.file", getSqliteFile());
             config.set("database.mysql.host", getMysqlHost());

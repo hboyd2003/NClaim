@@ -15,9 +15,9 @@ public interface DatabaseManager {
     List<User> loadAllUsers();
     void saveClaim(Claim claim);
     void saveClaimsBatch(List<Claim> claims);
-    Claim loadClaim(String claimId);
+    Claim loadClaim(UUID claimId);
     List<Claim> loadAllClaims();
-    void deleteClaim(String claimId);
+    void deleteClaim(UUID claimId);
     Connection getConnection() throws SQLException;
     void close();
 

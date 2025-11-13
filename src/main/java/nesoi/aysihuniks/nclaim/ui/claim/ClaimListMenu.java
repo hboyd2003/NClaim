@@ -201,7 +201,7 @@ public class ClaimListMenu extends BaseMenu {
 
         ItemStack item = ItemCreator.of(isOwner ? getMaterial("own_claims") : getMaterial("coop_claims"))
                 .name(getString(buttonPath + ".display_name")
-                        .replace("{claim_id}", claim.getClaimId()))
+                        .replace("{claim_id}", claim.getClaimId().toString()))
                 .lore(lore)
                 .get();
 

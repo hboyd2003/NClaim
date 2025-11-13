@@ -43,9 +43,8 @@ public class ClaimSettingsManager {
 
         claim.getSettings().set(setting, newState);
 
-        if (plugin.getNconfig().isDatabaseEnabled()) {
-            plugin.getDatabaseManager().saveClaim(claim);
-        }
+        plugin.getDatabaseManager().saveClaim(claim);
+
     }
 
     public boolean isSettingEnabled(Claim claim, Setting setting) {

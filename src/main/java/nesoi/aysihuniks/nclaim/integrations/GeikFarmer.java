@@ -19,7 +19,7 @@ public class GeikFarmer extends Integrations {
     @Override
     public UUID getOwnerUUID(String regionId) {
         for (Claim claims : Claim.getClaims()) {
-            if (claims.getClaimId().equals(regionId)) {
+            if (claims.getRegionID().equals(regionId)) {
                 return claims.getOwner();
             }
         }
@@ -35,7 +35,7 @@ public class GeikFarmer extends Integrations {
     @Override
     public String getRegionID(Location location) {
         Claim claim = Claim.getClaim(location.getChunk());
-        return claim != null ? claim.getClaimId() : null;
+        return claim != null ? claim.getRegionID() : null;
     }
 
 

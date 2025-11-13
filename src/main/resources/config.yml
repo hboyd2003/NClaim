@@ -141,7 +141,6 @@ webhook_settings:
 # Database Configuration
 # Chooses between MySQL and SQLite for data storage
 database:
-  enable: false  # Set to true to use database storage instead of YAML
   type: "mysql"  # Options: "mysql" or "sqlite"
 
   # SQLite Configuration

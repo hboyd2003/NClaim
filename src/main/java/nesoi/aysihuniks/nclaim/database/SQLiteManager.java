@@ -239,7 +239,7 @@ public class SQLiteManager implements DatabaseManager {
     }
 
     private void prepareClaimStatement(PreparedStatement stmt, Claim claim) throws SQLException {
-        stmt.setString(1, claim.getClaimId());
+        stmt.setString(1, claim.getClaimId().toString());
         stmt.setString(2, claim.getChunk().getWorld().getName());
         stmt.setInt(3, claim.getChunk().getX());
         stmt.setInt(4, claim.getChunk().getZ());
@@ -263,7 +263,7 @@ public class SQLiteManager implements DatabaseManager {
         try (PreparedStatement stmt = conn.prepareStatement(SQLStatements.SAVE_CLAIM_COOP)) {
             for (UUID coopPlayer : claim.getCoopPlayers()) {
                 Map<String, Boolean> permissions = serializePermissions(claim.getCoopPermissions().get(coopPlayer));
-                stmt.setString(1, claim.getClaimId());
+                stmt.setString(1, claim.getClaimId().toString());
                 stmt.setString(2, coopPlayer.toString());
                 stmt.setString(3, getTimestamp(claim.getCoopPlayerJoinDate().get(coopPlayer)).toString());
                 stmt.setString(4, gson.toJson(permissions));
@@ -287,17 +287,17 @@ public class SQLiteManager implements DatabaseManager {
         }
 
         try (PreparedStatement stmt = conn.prepareStatement(SQLStatements.SAVE_CLAIM_SETTINGS)) {
-            stmt.setString(1, claim.getClaimId());
+            stmt.setString(1, claim.getClaimId().toString());
             stmt.setString(2, gson.toJson(settings));
             stmt.executeUpdate();
         }
     }
 
     @Override
-    public Claim loadClaim(String claimId) {
+    public Claim loadClaim(UUID claimId) {
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(SQLStatements.LOAD_CLAIM)) {
-            stmt.setString(1, claimId);
+            stmt.setString(1, claimId.toString());
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
@@ -333,7 +333,7 @@ public class SQLiteManager implements DatabaseManager {
         if (world == null) return null;
 
         Chunk chunk = world.getChunkAt(rs.getInt("chunk_x"), rs.getInt("chunk_z"));
-        String claimId = rs.getString("claim_id");
+        UUID claimId = UUID.fromString(rs.getString("claim_id"));
 
         Date createdAt = Timestamp.valueOf(rs.getString("created_at"));
         Date expiredAt = Timestamp.valueOf(rs.getString("expired_at"));
@@ -388,11 +388,11 @@ public class SQLiteManager implements DatabaseManager {
         );
     }
 
-    private CoopData loadClaimCoops(Connection conn, String claimId) throws SQLException {
+    private CoopData loadClaimCoops(Connection conn, UUID claimId) throws SQLException {
         CoopData coopData = new CoopData();
 
         try (PreparedStatement stmt = conn.prepareStatement(SQLStatements.LOAD_CLAIM_COOPS)) {
-            stmt.setString(1, claimId);
+            stmt.setString(1, claimId.toString());
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
@@ -414,11 +414,11 @@ public class SQLiteManager implements DatabaseManager {
         return coopData;
     }
 
-    private ClaimSetting loadClaimSettings(Connection conn, String claimId) throws SQLException {
+    private ClaimSetting loadClaimSettings(Connection conn, UUID claimId) throws SQLException {
         ClaimSetting settings = new ClaimSetting();
 
         try (PreparedStatement stmt = conn.prepareStatement(SQLStatements.LOAD_CLAIM_SETTINGS)) {
-            stmt.setString(1, claimId);
+            stmt.setString(1, claimId.toString());
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
@@ -435,7 +435,7 @@ public class SQLiteManager implements DatabaseManager {
     }
 
     @Override
-    public void deleteClaim(String claimId) {
+    public void deleteClaim(UUID claimId) {
         try (Connection conn = getConnection()) {
             executeUpdate(conn, SQLStatements.DELETE_CLAIM_COOPS, claimId);
             executeUpdate(conn, SQLStatements.DELETE_CLAIM_SETTINGS, claimId);
@@ -445,9 +445,9 @@ public class SQLiteManager implements DatabaseManager {
         }
     }
 
-    private void executeUpdate(Connection conn, String sql, String claimId) throws SQLException {
+    private void executeUpdate(Connection conn, String sql, UUID claimId) throws SQLException {
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, claimId);
+            stmt.setString(1, claimId.toString());
             stmt.executeUpdate();
         }
     }

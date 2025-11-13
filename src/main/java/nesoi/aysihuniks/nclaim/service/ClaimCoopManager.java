@@ -51,9 +51,9 @@ public class ClaimCoopManager {
 
         addCoopToClaimData(claim, coopUUID);
 
-        if (plugin.getNconfig().isDatabaseEnabled()) {
-            plugin.getDatabaseManager().saveClaim(claim);
-        }
+
+        plugin.getDatabaseManager().saveClaim(claim);
+
 
         ChannelType.CHAT.send(owner, plugin.getLangManager().getString("claim.coop.added")
                 .replace("{coop}", coopPlayer.getName()));
@@ -77,9 +77,8 @@ public class ClaimCoopManager {
 
         removeCoopFromClaimData(claim, coopUUID);
 
-        if (plugin.getNconfig().isDatabaseEnabled()) {
-            plugin.getDatabaseManager().saveClaim(claim);
-        }
+        plugin.getDatabaseManager().saveClaim(claim);
+
 
         Player coopPlayer = Bukkit.getPlayer(coopUUID);
         String coopName = coopPlayer != null ? coopPlayer.getName() : coopUUID.toString();
@@ -111,9 +110,8 @@ public class ClaimCoopManager {
 
         claim.getCoopPermissions().get(player).toggle(permission);
 
-        if (plugin.getNconfig().isDatabaseEnabled()) {
-            plugin.getDatabaseManager().saveClaim(claim);
-        }
+        plugin.getDatabaseManager().saveClaim(claim);
+
     }
 
     public void toggleCoopPermissionCategory(Claim claim, @NotNull UUID player, @NotNull PermissionCategory category) {
@@ -138,9 +136,7 @@ public class ClaimCoopManager {
 
         claim.getCoopPermissions().get(player).setAllPermissionsInCategory(category, newState);
 
-        if (plugin.getNconfig().isDatabaseEnabled()) {
-            plugin.getDatabaseManager().saveClaim(claim);
-        }
+        plugin.getDatabaseManager().saveClaim(claim);
     }
 
     private void addCoopToClaimData(Claim claim, UUID coopUUID) {

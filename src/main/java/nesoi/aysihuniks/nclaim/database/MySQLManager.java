@@ -32,7 +32,7 @@ public class MySQLManager implements DatabaseManager {
 
     private static final String CREATE_CLAIMS_TABLE = 
         "CREATE TABLE IF NOT EXISTS claims (" +
-        "claim_id VARCHAR(100) PRIMARY KEY, " +
+        "claim_id VARCHAR(36) PRIMARY KEY, " +
         "chunk_world VARCHAR(100), " +
         "chunk_x INT, " +
         "chunk_z INT, " +
@@ -47,7 +47,7 @@ public class MySQLManager implements DatabaseManager {
 
     private static final String CREATE_CLAIM_COOPS_TABLE =
         "CREATE TABLE IF NOT EXISTS claim_coops (" +
-        "claim_id VARCHAR(100), " +
+        "claim_id VARCHAR(36), " +
         "player_uuid VARCHAR(36), " +
         "joined_at TIMESTAMP, " +
         "permissions TEXT, " +
@@ -55,7 +55,7 @@ public class MySQLManager implements DatabaseManager {
 
     private static final String CREATE_CLAIM_SETTINGS_TABLE =
         "CREATE TABLE IF NOT EXISTS claim_settings (" +
-        "claim_id VARCHAR(100) PRIMARY KEY, " +
+        "claim_id VARCHAR(36) PRIMARY KEY, " +
         "settings TEXT)";
 
     private static final String SAVE_USER =
@@ -210,7 +210,7 @@ public class MySQLManager implements DatabaseManager {
             
             while (rs.next()) {
                 users.add(new User(
-                    UUID.fromString(rs.getString("uuid")),
+                    (UUID) rs.getObject("uuid"),
                     rs.getDouble("balance"),
                     rs.getString("skinTexture"),
                     new ArrayList<>(),
@@ -225,37 +225,7 @@ public class MySQLManager implements DatabaseManager {
 
     public void saveClaim(Claim claim) {
         try (Connection conn = getConnection()) {
-            try (PreparedStatement stmt = conn.prepareStatement(SAVE_CLAIM)) {
-                stmt.setString(1, claim.getClaimId());
-                stmt.setString(2, claim.getChunk().getWorld().getName());
-                stmt.setInt(3, claim.getChunk().getX());
-                stmt.setInt(4, claim.getChunk().getZ());
-                stmt.setTimestamp(5, new Timestamp(claim.getCreatedAt().getTime()));
-                stmt.setTimestamp(6, claim.getExpiredAt() != null ? new Timestamp(claim.getExpiredAt().getTime()) : null);
-                stmt.setString(7, claim.getOwner().toString());
-                stmt.setString(8, NClaim.serializeLocation(claim.getClaimBlockLocation()));
-                stmt.setString(9, gson.toJson(claim.getLands()));
-                stmt.setLong(10, claim.getClaimValue());
-                stmt.setString(11, claim.getClaimBlockType().name());
-
-                List<String> purchasedBlockNames = claim.getPurchasedBlockTypes().stream()
-                        .map(Material::name)
-                        .collect(Collectors.toList());
-                stmt.setString(12, gson.toJson(purchasedBlockNames));
-
-                stmt.setTimestamp(13, claim.getExpiredAt() != null ? new Timestamp(claim.getExpiredAt().getTime()) : null);
-                stmt.setString(14, claim.getOwner().toString());
-                stmt.setString(15, NClaim.serializeLocation(claim.getClaimBlockLocation()));
-                stmt.setString(16, gson.toJson(claim.getLands()));
-                stmt.setLong(17, claim.getClaimValue());
-                stmt.setString(18, claim.getClaimBlockType().name());
-                stmt.setString(19, gson.toJson(purchasedBlockNames));
-
-                stmt.executeUpdate();
-            }
-
-            saveClaimCoops(conn, claim);
-            saveClaimSettings(conn, claim);
+            saveClaim(conn, claim);
 
         } catch (SQLException e) {
             Util.log("&cFailed to save claim: " + e.getMessage());
@@ -269,37 +239,7 @@ public class MySQLManager implements DatabaseManager {
 
             try {
                 for (Claim claim : claims) {
-                    try (PreparedStatement stmt = conn.prepareStatement(SAVE_CLAIM)) {
-                        stmt.setString(1, claim.getClaimId());
-                        stmt.setString(2, claim.getChunk().getWorld().getName());
-                        stmt.setInt(3, claim.getChunk().getX());
-                        stmt.setInt(4, claim.getChunk().getZ());
-                        stmt.setTimestamp(5, new Timestamp(claim.getCreatedAt().getTime()));
-                        stmt.setTimestamp(6, new Timestamp(claim.getExpiredAt().getTime()));
-                        stmt.setString(7, claim.getOwner().toString());
-                        stmt.setString(8, NClaim.serializeLocation(claim.getClaimBlockLocation()));
-                        stmt.setString(9, gson.toJson(claim.getLands()));
-                        stmt.setLong(10, claim.getClaimValue());
-                        stmt.setString(11, claim.getClaimBlockType().name());
-
-                        List<String> purchasedBlockNames = claim.getPurchasedBlockTypes().stream()
-                                .map(Material::name)
-                                .collect(Collectors.toList());
-                        stmt.setString(12, gson.toJson(purchasedBlockNames));
-
-                        stmt.setTimestamp(13, new Timestamp(claim.getExpiredAt().getTime()));
-                        stmt.setString(14, claim.getOwner().toString());
-                        stmt.setString(15, NClaim.serializeLocation(claim.getClaimBlockLocation()));
-                        stmt.setString(16, gson.toJson(claim.getLands()));
-                        stmt.setLong(17, claim.getClaimValue());
-                        stmt.setString(18, claim.getClaimBlockType().name());
-                        stmt.setString(19, gson.toJson(purchasedBlockNames));
-
-                        stmt.executeUpdate();
-                    }
-
-                    saveClaimCoops(conn, claim);
-                    saveClaimSettings(conn, claim);
+                    saveClaim(conn, claim);
                 }
 
                 conn.commit();
@@ -314,9 +254,43 @@ public class MySQLManager implements DatabaseManager {
         }
     }
 
+    private void saveClaim(Connection conn, Claim claim) throws SQLException {
+        try (PreparedStatement stmt = conn.prepareStatement(SAVE_CLAIM)) {
+            stmt.setString(1, claim.getClaimId().toString());
+            stmt.setString(2, claim.getChunk().getWorld().getName());
+            stmt.setInt(3, claim.getChunk().getX());
+            stmt.setInt(4, claim.getChunk().getZ());
+            stmt.setTimestamp(5, new Timestamp(claim.getCreatedAt().getTime()));
+            stmt.setTimestamp(6, new Timestamp(claim.getExpiredAt().getTime()));
+            stmt.setString(7, claim.getOwner().toString());
+            stmt.setString(8, NClaim.serializeLocation(claim.getClaimBlockLocation()));
+            stmt.setString(9, gson.toJson(claim.getLands()));
+            stmt.setLong(10, claim.getClaimValue());
+            stmt.setString(11, claim.getClaimBlockType().name());
+
+            List<String> purchasedBlockNames = claim.getPurchasedBlockTypes().stream()
+                    .map(Material::name)
+                    .collect(Collectors.toList());
+            stmt.setString(12, gson.toJson(purchasedBlockNames));
+
+            stmt.setTimestamp(13, new Timestamp(claim.getExpiredAt().getTime()));
+            stmt.setString(14, claim.getOwner().toString());
+            stmt.setString(15, NClaim.serializeLocation(claim.getClaimBlockLocation()));
+            stmt.setString(16, gson.toJson(claim.getLands()));
+            stmt.setLong(17, claim.getClaimValue());
+            stmt.setString(18, claim.getClaimBlockType().name());
+            stmt.setString(19, gson.toJson(purchasedBlockNames));
+
+            stmt.executeUpdate();
+        }
+
+        saveClaimCoops(conn, claim);
+        saveClaimSettings(conn, claim);
+    }
+
     private void saveClaimCoops(Connection conn, Claim claim) throws SQLException {
         try (PreparedStatement deleteStmt = conn.prepareStatement(DELETE_CLAIM_COOPS)) {
-            deleteStmt.setString(1, claim.getClaimId());
+            deleteStmt.setString(1, claim.getClaimId().toString());
             deleteStmt.executeUpdate();
         }
 
@@ -329,7 +303,7 @@ public class MySQLManager implements DatabaseManager {
                     permissions.put(perm.name(), coopPerm.isEnabled(perm));
                 }
 
-                stmt.setString(1, claim.getClaimId());
+                stmt.setString(1, claim.getClaimId().toString());
                 stmt.setString(2, coopPlayer.toString());
                 stmt.setTimestamp(3, new Timestamp(claim.getCoopPlayerJoinDate().get(coopPlayer).getTime()));
                 stmt.setString(4, gson.toJson(permissions));
@@ -348,18 +322,18 @@ public class MySQLManager implements DatabaseManager {
         }
 
         try (PreparedStatement stmt = conn.prepareStatement(SAVE_CLAIM_SETTINGS)) {
-            stmt.setString(1, claim.getClaimId());
+            stmt.setString(1, claim.getClaimId().toString());
             stmt.setString(2, gson.toJson(settings));
             stmt.setString(3, gson.toJson(settings));
             stmt.executeUpdate();
         }
     }
 
-    public Claim loadClaim(String claimId) {
+    public Claim loadClaim(UUID claimId) {
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(LOAD_CLAIM)) {
             
-            stmt.setString(1, claimId);
+            stmt.setString(1, claimId.toString());
             ResultSet rs = stmt.executeQuery();
             
             if (rs.next()) {
@@ -426,10 +400,10 @@ public class MySQLManager implements DatabaseManager {
         if (world == null) return null;
 
         Chunk chunk = world.getChunkAt(rs.getInt("chunk_x"), rs.getInt("chunk_z"));
-        String claimId = rs.getString("claim_id");
+        UUID claimId = (UUID) rs.getObject("claim_id");
         Date createdAt = new Date(rs.getTimestamp("created_at").getTime());
         Date expiredAt = new Date(rs.getTimestamp("expired_at").getTime());
-        UUID owner = UUID.fromString(rs.getString("owner"));
+        UUID owner = (UUID) rs.getObject("owner_id");
         Location claimBlockLocation = NClaim.deserializeLocation(rs.getString("claim_block_location"));
         long claimValue = rs.getLong("claim_value");
         Material claimBlockType = Material.valueOf(rs.getString("claim_block_type"));
@@ -472,15 +446,15 @@ public class MySQLManager implements DatabaseManager {
         );
     }
 
-    private CoopData loadClaimCoops(Connection conn, String claimId) throws SQLException {
+    private CoopData loadClaimCoops(Connection conn, UUID claimId) throws SQLException {
         CoopData coopData = new CoopData();
 
         try (PreparedStatement stmt = conn.prepareStatement(LOAD_CLAIM_COOPS)) {
-            stmt.setString(1, claimId);
+            stmt.setString(1, claimId.toString());
             ResultSet rs = stmt.executeQuery();
             
             while (rs.next()) {
-                UUID playerUuid = UUID.fromString(rs.getString("player_uuid"));
+                UUID playerUuid = (UUID) rs.getObject("player_uuid");
                 coopData.getCoopPlayers().add(playerUuid);
                 coopData.getJoinDates().put(playerUuid, new Date(rs.getTimestamp("joined_at").getTime()));
                 
@@ -498,11 +472,11 @@ public class MySQLManager implements DatabaseManager {
         return coopData;
     }
 
-    private ClaimSetting loadClaimSettings(Connection conn, String claimId) throws SQLException {
+    private ClaimSetting loadClaimSettings(Connection conn, UUID claimId) throws SQLException {
         ClaimSetting settings = new ClaimSetting();
         
         try (PreparedStatement stmt = conn.prepareStatement(LOAD_CLAIM_SETTINGS)) {
-            stmt.setString(1, claimId);
+            stmt.setString(1, claimId.toString());
             ResultSet rs = stmt.executeQuery();
             
             if (rs.next()) {
@@ -518,20 +492,20 @@ public class MySQLManager implements DatabaseManager {
         return settings;
     }
 
-    public void deleteClaim(String claimId) {
+    public void deleteClaim(UUID claimId) {
         try (Connection conn = getConnection()) {
             try (PreparedStatement coopsStmt = conn.prepareStatement(DELETE_CLAIM_COOPS)) {
-                coopsStmt.setString(1, claimId);
+                coopsStmt.setString(1, claimId.toString());
                 coopsStmt.executeUpdate();
             }
 
             try (PreparedStatement settingsStmt = conn.prepareStatement(DELETE_CLAIM_SETTINGS)) {
-                settingsStmt.setString(1, claimId);
+                settingsStmt.setString(1, claimId.toString());
                 settingsStmt.executeUpdate();
             }
 
             try (PreparedStatement claimStmt = conn.prepareStatement(DELETE_CLAIM)) {
-                claimStmt.setString(1, claimId);
+                claimStmt.setString(1, claimId.toString());
                 claimStmt.executeUpdate();
             }
         } catch (SQLException e) {

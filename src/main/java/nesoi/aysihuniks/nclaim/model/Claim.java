@@ -31,7 +31,7 @@ public class Claim {
     private NClaim plugin;
 
     public Claim(
-            @NotNull String claimId,
+            @NotNull UUID claimId,
             @NotNull Chunk chunk,
             @NotNull Date createdAt,
             @NotNull Date expiredAt,
@@ -68,7 +68,7 @@ public class Claim {
         claims.add(this);
     }
 
-    private final @NotNull String claimId;
+    private final @NotNull UUID claimId;
     private final @NotNull Chunk chunk;
     private final @NotNull Date createdAt;
     private @NotNull Date expiredAt;
@@ -180,9 +180,9 @@ public class Claim {
         world.spawnParticle(NClaim.getParticle(DParticle.LARGE_SMOKE, DParticle.SMOKE_LARGE), claimBlock, 1);
         world.playSound(claimBlock, Sound.ENTITY_GENERIC_EXPLODE, 1, 1);
 
-        if (plugin.getNconfig().isDatabaseEnabled()) {
-            plugin.getDatabaseManager().deleteClaim(getClaimId());
-        }
+
+        plugin.getDatabaseManager().deleteClaim(getClaimId());
+
 
         claims.remove(this);
 
@@ -313,9 +313,7 @@ public class Claim {
 
         getCoopPlayers().remove(newOwner);
 
-        if (plugin.getNconfig().isDatabaseEnabled()) {
-            plugin.getDatabaseManager().saveClaim(this);
-        }
+        plugin.getDatabaseManager().saveClaim(this);
     }
 
     public boolean isOwner(UUID uuid) {
@@ -348,5 +346,10 @@ public class Claim {
 
     public void teleport(Player teleporter) {
         teleporter.teleport(claimBlockLocation.clone().add(0.5,1,0.5));
+    }
+
+    // Returns chunk coords not region
+    public String getRegionID() {
+        return this.chunk.getWorld().getName() + "_" + this.chunk.getX() + "_" + this.chunk.getZ();
     }
 }

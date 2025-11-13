@@ -57,7 +57,7 @@ public final class NClaim extends JavaPlugin {
     private HeadManager headManager;
     private MySQLManager mySQLManager;
     private SQLiteManager sqLiteManager;
-    private DatabaseManager databaseManager;
+    private @NotNull DatabaseManager databaseManager;
     @Getter
     private static Economy econ = null;
 
@@ -132,18 +132,15 @@ public final class NClaim extends JavaPlugin {
     public void reloadPlugin() {
         stopTasks();
 
-        String oldDatabaseType = nconfig.isDatabaseEnabled() ? nconfig.getDatabaseType().toLowerCase() : "yaml";
+        String oldDatabaseType = nconfig.getDatabaseType().toLowerCase();
 
-        if (nconfig.isDatabaseEnabled() && databaseManager != null) {
-            for (Claim claim : Claim.claims) {
-                try {
-                    databaseManager.saveClaim(claim);
-                } catch (Exception e) {
-                    Util.log("&cError saving claim during reload: " + e.getMessage());
-                }
+
+        for (Claim claim : Claim.claims) {
+            try {
+                databaseManager.saveClaim(claim);
+            } catch (Exception e) {
+                Util.log("&cError saving claim during reload: " + e.getMessage());
             }
-        } else if (claimStorageManager != null) {
-            claimStorageManager.saveClaims();
         }
 
         nconfig = new Config(this).load().updateConfig();
@@ -151,66 +148,58 @@ public final class NClaim extends JavaPlugin {
         langManager = new LangManager(this, configManager.getString("lang_file", "en-US"));
         guiLangManager = new GuiLangManager();
 
-        if (nconfig.isDatabaseEnabled()) {
-            if (mySQLManager != null) {
-                mySQLManager.close();
-            }
-            if (sqLiteManager != null) {
-                sqLiteManager.close();
-            }
 
-            String dbType = nconfig.getDatabaseType().toLowerCase();
-            try {
-                if ("mysql".equals(dbType)) {
-                    mySQLManager = new MySQLManager(nconfig);
-                    databaseManager = mySQLManager;
-                    Util.log("&aMySQL connection reestablished.");
-                } else if ("sqlite".equals(dbType)) {
-                    sqLiteManager = new SQLiteManager(nconfig);
-                    databaseManager = sqLiteManager;
-                    Util.log("&aSQLite connection reestablished.");
-                }
-            } catch (Exception e) {
-                Util.log("&cDatabase reconnection failed: " + e.getMessage());
-                databaseManager = null;
+        if (mySQLManager != null) {
+            mySQLManager.close();
+        }
+        if (sqLiteManager != null) {
+            sqLiteManager.close();
+        }
+
+        String dbType = nconfig.getDatabaseType().toLowerCase();
+        try {
+            if ("mysql".equals(dbType)) {
+                mySQLManager = new MySQLManager(nconfig);
+                databaseManager = mySQLManager;
+                Util.log("&aMySQL connection reestablished.");
+            } else if ("sqlite".equals(dbType)) {
+                sqLiteManager = new SQLiteManager(nconfig);
+                databaseManager = sqLiteManager;
+                Util.log("&aSQLite connection reestablished.");
             }
+        } catch (Exception e) {
+            Util.log("&cDatabase reconnection failed: " + e.getMessage());
+            throw e;
         }
 
         claimSettingsManager = new ClaimSettingsManager(this);
 
-        if (nconfig.isDatabaseEnabled() && databaseManager != null) {
-            try {
-                List<Claim> claims = databaseManager.loadAllClaims();
+        try {
+            List<Claim> claims = databaseManager.loadAllClaims();
 
-                String newDatabaseType = nconfig.getDatabaseType().toLowerCase();
-                if (claims.isEmpty() && !oldDatabaseType.equals(newDatabaseType) && !Claim.claims.isEmpty()) {
-                    Util.log("&eDatabase type changed from " + oldDatabaseType + " to " + newDatabaseType +
-                            ", migrating " + Claim.claims.size() + " claims...");
+            String newDatabaseType = nconfig.getDatabaseType().toLowerCase();
+            if (claims.isEmpty() && !oldDatabaseType.equals(newDatabaseType) && !Claim.claims.isEmpty()) {
+                Util.log("&eDatabase type changed from " + oldDatabaseType + " to " + newDatabaseType +
+                        ", migrating " + Claim.claims.size() + " claims...");
 
-                    for (Claim claim : Claim.claims) {
-                        try {
-                            databaseManager.saveClaim(claim);
-                        } catch (Exception e) {
-                            Util.log("&cError migrating claim: " + e.getMessage());
-                        }
+                for (Claim claim : Claim.claims) {
+                    try {
+                        databaseManager.saveClaim(claim);
+                    } catch (Exception e) {
+                        Util.log("&cError migrating claim: " + e.getMessage());
                     }
-                    Util.log("&aMigration completed! " + Claim.claims.size() + " claims migrated to " + newDatabaseType);
-                } else {
-                    Claim.claims.clear();
-                    Claim.claims.addAll(claims);
                 }
+                Util.log("&aMigration completed! " + Claim.claims.size() + " claims migrated to " + newDatabaseType);
+            } else {
+                Claim.claims.clear();
+                Claim.claims.addAll(claims);
+            }
 
-                Util.log("&aReloaded " + Claim.claims.size() + " claims from database.");
-            } catch (Exception e) {
-                Util.log("&cFailed to reload from database: " + e.getMessage());
-                if (claimStorageManager != null) {
-                    claimStorageManager.loadClaims();
-                }
-            }
-        } else {
-            if (claimStorageManager != null) {
-                claimStorageManager.loadClaims();
-            }
+            Util.log("&aReloaded " + Claim.claims.size() + " claims from database.");
+        } catch (Exception e) {
+            Util.log("&cFailed to reload from database, plugin will be disabled: " + e.getMessage());
+            this.getServer().getPluginManager().disablePlugin(this);
+            return;
         }
 
         for (Player player : getServer().getOnlinePlayers()) {
@@ -393,14 +382,10 @@ public final class NClaim extends JavaPlugin {
                     claim.setClaimValue(claimValue);
                 }
 
-                if (nconfig.isDatabaseEnabled() && databaseManager != null) {
-                    try {
-                        databaseManager.saveClaimsBatch(new ArrayList<>(Claim.claims));
-                    } catch (Exception e) {
-                        Util.log("&cFailed to save claims to database: " + e.getMessage());
-                    }
-                } else if (claimStorageManager != null) {
-                    claimStorageManager.saveClaims();
+                try {
+                    databaseManager.saveClaimsBatch(new ArrayList<>(Claim.claims));
+                } catch (Exception e) {
+                    Util.log("&cFailed to save claims to database: " + e.getMessage());
                 }
 
                 int claimCount = Claim.claims.size();
@@ -418,23 +403,13 @@ public final class NClaim extends JavaPlugin {
     }
 
     private void loadData() {
-        if (nconfig.isDatabaseEnabled() && databaseManager != null) {
-            try {
-                List<Claim> claims = databaseManager.loadAllClaims();
-                Claim.claims.clear();
-                Claim.claims.addAll(claims);
-                Util.log("&aLoaded " + claims.size() + " claims from database.");
-
-                if (claims.isEmpty()) {
-                    checkForMigrationOpportunity();
-                }
-
-            } catch (Exception e) {
-                Util.log("&cFailed to load from database: " + e.getMessage());
-                claimStorageManager.loadClaims();
-            }
-        } else {
-            claimStorageManager.loadClaims();
+        try {
+            List<Claim> claims = databaseManager.loadAllClaims();
+            Claim.claims.clear();
+            Claim.claims.addAll(claims);
+            Util.log("&aLoaded " + claims.size() + " claims from database.");
+        } catch (Exception e) {
+            Util.log("&cFailed to load from database: " + e.getMessage());
         }
 
         for (Player player : getServer().getOnlinePlayers()) {
@@ -472,32 +447,12 @@ public final class NClaim extends JavaPlugin {
             }
         }
 
-        if (nconfig.isDatabaseEnabled() && databaseManager != null) {
-            try {
-                databaseManager.saveClaimsBatch(new ArrayList<>(Claim.claims));
-                Util.log("&aShutdown: Saved " + Claim.claims.size() + " claims to database.");
-            } catch (Exception e) {
-                Util.log("&cFailed to save claims to database during shutdown: " + e.getMessage());
-                e.printStackTrace();
-
-                if (claimStorageManager != null) {
-                    try {
-                        claimStorageManager.saveClaims();
-                        Util.log("&eFallback: Saved claims to YAML file.");
-                    } catch (Exception yamlError) {
-                        Util.log("&cFallback YAML save also failed: " + yamlError.getMessage());
-                        yamlError.printStackTrace();
-                    }
-                }
-            }
-        } else if (claimStorageManager != null) {
-            try {
-                claimStorageManager.saveClaims();
-                Util.log("&aShutdown: Saved " + Claim.claims.size() + " claims to YAML file.");
-            } catch (Exception e) {
-                Util.log("&cFailed to save claims to YAML during shutdown: " + e.getMessage());
-                e.printStackTrace();
-            }
+        try {
+            databaseManager.saveClaimsBatch(new ArrayList<>(Claim.claims));
+            Util.log("&aShutdown: Saved " + Claim.claims.size() + " claims to database.");
+        } catch (Exception e) {
+            Util.log("&cFailed to save claims to database during shutdown: " + e.getMessage());
+            e.printStackTrace();
         }
 
         try {
@@ -623,48 +578,29 @@ public final class NClaim extends JavaPlugin {
     }
 
     private void setupDatabase() {
-        if (nconfig.isDatabaseEnabled()) {
-            try {
-                String dbType = nconfig.getDatabaseType().toLowerCase();
-                if ("mysql".equals(dbType)) {
-                    mySQLManager = new MySQLManager(nconfig);
-                    databaseManager = mySQLManager;
-                    Util.log("&aInitializing MySQL connection...");
-                } else if ("sqlite".equals(dbType)) {
-                    sqLiteManager = new SQLiteManager(nconfig);
-                    databaseManager = sqLiteManager;
-                    Util.log("&aInitializing SQLite connection...");
-                } else {
-                    throw new IllegalArgumentException("Unsupported database type: " + dbType);
-                }
-
-                int claimCount = databaseManager.getClaimCount();
-                int userCount = databaseManager.getUserCount();
-                Util.log("&aFound " + claimCount + " claims and " + userCount + " users in database");
-
-                Util.log("&a" + dbType.toUpperCase() + " connection established successfully!");
-            } catch (Exception e) {
-                nconfig.setDatabaseEnabled(false);
-                nconfig.save();
-                Util.log("&cDatabase connection failed (Falling back to YAML): " + e.getMessage());
+        try {
+            String dbType = nconfig.getDatabaseType().toLowerCase();
+            if ("mysql".equals(dbType)) {
+                mySQLManager = new MySQLManager(nconfig);
+                databaseManager = mySQLManager;
+                Util.log("&aInitializing MySQL connection...");
+            } else if ("sqlite".equals(dbType)) {
+                sqLiteManager = new SQLiteManager(nconfig);
+                databaseManager = sqLiteManager;
+                Util.log("&aInitializing SQLite connection...");
+            } else {
+                throw new IllegalArgumentException("Unsupported database type: " + dbType);
             }
-        }
-    }
 
-    private void checkForMigrationOpportunity() {
-        File claimsFile = new File(getDataFolder(), "claims.yml");
-        File playersFolder = new File(getDataFolder(), "players");
+            int claimCount = databaseManager.getClaimCount();
+            int userCount = databaseManager.getUserCount();
+            Util.log("&aFound " + claimCount + " claims and " + userCount + " users in database");
 
-        boolean hasClaimData = claimsFile.exists();
-        boolean hasUserData = false;
-        if(playersFolder.exists()) {
-            File[] playerFiles = playersFolder.listFiles();
-            hasUserData = playerFiles != null && playerFiles.length > 0;
-        }
-
-        if (hasClaimData || hasUserData) {
-            String dbType = nconfig.getDatabaseType().toUpperCase();
-            Util.log("&eEmpty " + dbType + " database detected but YAML data exists.");
+            Util.log("&a" + dbType.toUpperCase() + " connection established successfully!");
+        } catch (Exception e) {
+            nconfig.save();
+            Util.log("&cDatabase connection failed, plugin will be disabled: " + e.getMessage());
+            NClaim.inst().getServer().getPluginManager().disablePlugin(NClaim.inst());
         }
     }
 

@@ -21,35 +21,35 @@ public class FarmerListener implements Listener {
 
     @EventHandler
     public void buyClaim(ClaimCreateEvent event) {
-        String claimId = event.getClaim().getClaimId();
+        String regionID = event.getClaim().getRegionID();
         if(Main.getConfigFile().getSettings().isAutoCreateFarmer()) {
-            new Farmer("nclaim_" + claimId, 0, event.getSender().getUniqueId());
+            new Farmer(regionID, 0, event.getSender().getUniqueId());
             ChannelType.CHAT.send(event.getSender(), Main.getLangFile().getMessages().getBoughtFarmer());
         }
     }
 
     @EventHandler
     public void addCoop(ClaimCoopAddEvent event) {
-        Claim claim = event.getClaim();
-        if (!FarmerManager.getFarmers().containsKey(claim.getClaimId())) return;
+        String regionID = event.getClaim().getRegionID();
+        if (!FarmerManager.getFarmers().containsKey(regionID)) return;
         Player coopPlayer = event.getCoopPlayer();
-        FarmerManager.getFarmers().get(claim.getClaimId()).addUser(coopPlayer.getUniqueId(), coopPlayer.getName(), FarmerPerm.COOP);
+        FarmerManager.getFarmers().get(regionID).addUser(coopPlayer.getUniqueId(), coopPlayer.getName(), FarmerPerm.COOP);
     }
 
     @EventHandler
     public void kickCoop(ClaimCoopRemoveEvent event) {
-        Claim claim = event.getClaim();
-        if (!FarmerManager.getFarmers().containsKey(claim.getClaimId())) return;
+        String regionID = event.getClaim().getRegionID();
+        if (!FarmerManager.getFarmers().containsKey(regionID)) return;
         UUID coopPlayer = event.getCoopPlayerUUID();
-        Optional<User> user = FarmerManager.getFarmers().get(claim.getClaimId()).getUsers().stream().filter(u -> u.getUuid().equals(coopPlayer)).findFirst();
-        user.ifPresent(FarmerManager.getFarmers().get(claim.getClaimId())::removeUser);
+        Optional<User> user = FarmerManager.getFarmers().get(regionID).getUsers().stream().filter(u -> u.getUuid().equals(coopPlayer)).findFirst();
+        user.ifPresent(FarmerManager.getFarmers().get(regionID)::removeUser);
     }
 
     @EventHandler
     public void removeClaim(ClaimRemoveEvent event) {
-        Claim claim = event.getClaim();
-        if (!FarmerManager.getFarmers().containsKey(claim.getClaimId())) return;
-        FarmerManager.getFarmers().remove(claim.getClaimId());
+        String regionID = event.getClaim().getRegionID();
+        if (!FarmerManager.getFarmers().containsKey(regionID)) return;
+        FarmerManager.getFarmers().remove(regionID);
     }
 
     @EventHandler
@@ -57,7 +57,7 @@ public class FarmerListener implements Listener {
         String farmerRegionId = event.getFarmer().getRegionID();
 
         Optional<Claim> claim = Claim.getClaims().stream()
-                .filter(c -> c.getClaimId().equals(farmerRegionId))
+                .filter(c -> c.getRegionID().equals(farmerRegionId))
                 .findFirst();
 
         if (!claim.isPresent()) return;

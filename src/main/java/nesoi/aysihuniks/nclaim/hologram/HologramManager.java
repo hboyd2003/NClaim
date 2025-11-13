@@ -36,7 +36,6 @@ public class HologramManager {
     public HologramManager(NClaim plugin) {
         this.plugin = plugin;
         initializeHologramHandler();
-        identifyPendingWorlds();
         scheduleInitialCleanup();
     }
 
@@ -47,36 +46,6 @@ public class HologramManager {
             hologramHandler = new FancyHologramHandler();
         } else {
             throw new IllegalStateException("No supported hologram plugin found!");
-        }
-    }
-
-    private void identifyPendingWorlds() {
-        if (plugin.getNconfig().isDatabaseEnabled()) return;
-
-        File file = new File(plugin.getDataFolder(), "claims.yml");
-        if (!file.exists()) return;
-
-        try {
-            FileConfiguration config = YamlConfiguration.loadConfiguration(file);
-            ConfigurationSection section = config.getConfigurationSection("chunks_claimed");
-            if (section == null) return;
-
-            for (String claimId : section.getKeys(false)) {
-                String[] parts = claimId.split("_");
-                if (parts.length == 3) {
-                    String worldName = parts[0];
-                    if (Bukkit.getWorld(worldName) == null) {
-                        pendingWorlds.add(worldName);
-                    }
-                }
-            }
-
-            if (!pendingWorlds.isEmpty()) {
-                Util.log("&eWaiting for " + pendingWorlds.size() + " worlds to load: " + pendingWorlds);
-            }
-
-        } catch (Exception e) {
-            Util.log("&cError identifying pending worlds: " + e.getMessage());
         }
     }
 

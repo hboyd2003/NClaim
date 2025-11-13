@@ -5,16 +5,11 @@ import lombok.Setter;
 import nesoi.aysihuniks.nclaim.NClaim;
 import nesoi.aysihuniks.nclaim.database.DatabaseManager;
 import org.bukkit.Bukkit;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-import org.nandayo.dapi.util.Util;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -57,12 +52,7 @@ public class User {
     public static void loadUser(UUID uuid) {
         if (getUser(uuid) != null) return;
 
-        DatabaseManager dbManager = NClaim.inst().getDatabaseManager();
-        if (NClaim.inst().getNconfig().isDatabaseEnabled() && dbManager != null) {
-            loadFromDatabase(dbManager, uuid);
-        } else {
-            loadFromYaml(uuid);
-        }
+        loadFromDatabase(NClaim.inst().getDatabaseManager(), uuid);
     }
 
     private static void loadFromDatabase(DatabaseManager dbManager, UUID uuid) {
@@ -70,19 +60,6 @@ public class User {
         if (user == null) {
             user = createNewUser(uuid);
         }
-        updateClaimCollections(user);
-    }
-
-    private static void loadFromYaml(UUID uuid) {
-        File folder = new File(NClaim.inst().getDataFolder(), "players");
-        if (!folder.exists()) folder.mkdirs();
-
-        File file = new File(folder, uuid + ".yml");
-        FileConfiguration config = YamlConfiguration.loadConfiguration(file);
-        double balance = config.getDouble("balance");
-        String skinTexture = config.getString("skinTexture", null);
-
-        User user = new User(uuid, balance, skinTexture, new ArrayList<>(), new ArrayList<>());
         updateClaimCollections(user);
     }
 
@@ -96,38 +73,18 @@ public class User {
 
         user.getPlayerClaims().addAll(Claim.getClaims().stream()
                 .filter(c -> c.getOwner().equals(user.getUuid()))
-                .collect(Collectors.toList()));
+                .toList());
 
         user.getCoopClaims().addAll(Claim.getClaims().stream()
                 .filter(c -> c.getCoopPlayers().contains(user.getUuid()))
-                .collect(Collectors.toList()));
+                .toList());
     }
 
     public static void saveUser(UUID uuid) {
         User user = getUser(uuid);
         if (user == null) return;
 
-        DatabaseManager dbManager = NClaim.inst().getDatabaseManager();
-        if (NClaim.inst().getNconfig().isDatabaseEnabled() && dbManager != null) {
-            dbManager.saveUser(user);
-        } else {
-            saveToYaml(user);
-        }
-    }
+        NClaim.inst().getDatabaseManager().saveUser(user);
 
-    private static void saveToYaml(User user) {
-        File folder = new File(NClaim.inst().getDataFolder(), "players");
-        if (!folder.exists()) folder.mkdirs();
-
-        File file = new File(folder, user.getUuid() + ".yml");
-        FileConfiguration config = YamlConfiguration.loadConfiguration(file);
-        config.set("balance", user.getBalance());
-        config.set("skinTexture", user.getSkinTexture());
-
-        try {
-            config.save(file);
-        } catch (Exception e) {
-            Util.log("&cFailed to save user data to YAML: " + e.getMessage());
-        }
     }
 }
