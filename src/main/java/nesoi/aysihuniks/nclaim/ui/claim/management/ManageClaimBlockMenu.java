@@ -71,32 +71,64 @@ public class ManageClaimBlockMenu extends BaseMenu {
     private void setup() {
         createInventory(MenuType.CHEST_6_ROWS, getString("title"));
 
-        addButton(new Button() {
-            @Override
-            protected @NotNull Set<Integer> getSlots() {
-                return Sets.newHashSet(12);
-            }
-
-            @Override
-            public @Nullable ItemStack getItem() {
-                return ItemCreator.of(getMaterial("teleport"))
-                        .name(getString("teleport.display_name"))
-                        .lore(getStringList("teleport.lore"))
-                        .get();
-            }
-
-            @Override
-            public void onClick(@NotNull Player p, @NotNull ClickType clickType) {
-                if(!claim.isSafeToTeleport()) {
-                    ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("claim.teleport.failed"));
-                    return;
+        if (NClaim.inst().getNconfig().isEnableTeleportToClaim()) {
+            addButton(new Button() {
+                @Override
+                protected @NotNull Set<Integer> getSlots() {
+                    return Sets.newHashSet(12);
                 }
 
-                claim.teleport(player);
-                ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("claim.teleport.success"));
-                player.closeInventory();
-            }
-        });
+                @Override
+                public @Nullable ItemStack getItem() {
+
+                    double price = NClaim.inst().getNconfig().getClaimTeleportPrice();
+
+                    String priceStr = price <= 0
+                            ? NClaim.inst().getGuiLangManager().getString("free")
+                            : String.format("%.2f", price);
+
+                    List<String> lore = new ArrayList<>(getStringList("teleport.lore"));
+                    lore.replaceAll(s -> s.replace("{price}", priceStr));
+
+                    return ItemCreator.of(getMaterial("teleport"))
+                            .name(getString("teleport.display_name"))
+                            .lore(lore)
+                            .get();
+                }
+
+                @Override
+                public void onClick(@NotNull Player p, @NotNull ClickType clickType) {
+                    if (!claim.isSafeToTeleport()) {
+                        ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("claim.teleport.failed"));
+                        return;
+                    }
+                    double balance;
+                    boolean useVault = NClaim.inst().getBalanceSystem() == Balance.VAULT;
+
+                    if (useVault) {
+                        balance = NClaim.inst().getEconomy().getBalance(player);
+                    } else {
+                        balance = User.getUser(player.getUniqueId()).getBalance();
+                    }
+
+                    double teleportPrice  = NClaim.inst().getNconfig().getClaimTeleportPrice();
+                    if (balance < teleportPrice) {
+                        ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.balance.not_enough"));
+                        return;
+                    }
+
+                    if (useVault) {
+                        NClaim.inst().getEconomy().withdrawPlayer(player, teleportPrice);
+                    } else {
+                        User.getUser(player.getUniqueId()).setBalance(balance - teleportPrice);
+                    }
+
+                    claim.teleport(player);
+                    ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("claim.teleport.success"));
+                    player.closeInventory();
+                }
+            });
+        }
 
         addButton(new Button() {
             @Override

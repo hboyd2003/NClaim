@@ -44,6 +44,9 @@ public class Config {
     private boolean claimDistanceCoopBypass;
     private int autoSave;
 
+    private boolean enableTeleportToClaim;
+    private double claimTeleportPrice;
+
     private boolean showHologramTitle;
     private boolean showHologramOwner;
     private boolean showHologramTimeLeft;
@@ -111,6 +114,8 @@ public class Config {
         setMaxCoopPlayers(config.getInt("claim_settings.max_coop.default", 3));
         setClaimExpiryDays(config.getInt("claim_settings.expiry_days", 7));
         setLastClaimTime(config.getLong("claim_settings.last_claim_time", 5));
+        setEnableTeleportToClaim(config.getBoolean("claim_settings.enable_teleport", true));
+        setClaimTeleportPrice(config.getDouble("claim_settings.teleport_price", 25));
 
         setShowHologramTitle(config.getBoolean("hologram_settings.show_title", true));
         setShowHologramOwner(config.getBoolean("hologram_settings.show_owner", true));
@@ -184,6 +189,8 @@ public class Config {
             config.set("claim_settings.max_coop.default", getMaxCoopPlayers());
             config.set("claim_settings.expiry_days", getClaimExpiryDays());
             config.set("claim_settings.last_claim_time", getLastClaimTime());
+            config.set("claim_settings.enable_teleport", isEnableTeleportToClaim());
+            config.set("claim_settings.teleport_price", getClaimTeleportPrice());
 
             config.set("hologram_settings.show_title", isShowHologramTitle());
             config.set("hologram_settings.show_owner", isShowHologramOwner());

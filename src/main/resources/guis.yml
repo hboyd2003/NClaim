@@ -589,7 +589,7 @@ guis:
         - ""
         - "&fTeleports you to claim location"
         - ""
-        - "&eClick to teleport"
+        - "&eClick to teleport for ${price}"
     move_claim_block:
       display_name: "&6Move the Claim Block"
       material: "SHULKER_BOX"
