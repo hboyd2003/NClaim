@@ -1,0 +1,161 @@
+plugins {
+    id 'java'
+    id 'maven-publish'
+    id("com.gradleup.shadow") version "9.2.2"
+    id("xyz.jpenilla.run-paper") version "2.3.1"
+}
+
+group = 'nesoi.aysihuniks'
+version = '3.3-prsmo'
+description = 'NClaim'
+
+repositories {
+    mavenCentral()
+    maven {
+        name = "spigotmc-repo"
+        url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots/"
+    }
+
+    maven {
+        url = "https://oss.sonatype.org/content/groups/public/"
+    }
+
+    maven {
+        url = "https://repo.codemc.io/repository/maven-snapshots/"
+    }
+
+    maven {
+        url = "https://repo.codemc.io/repository/maven-public/"
+    }
+
+    maven {
+        name = "jitpack.io"
+        url = "https://jitpack.io"
+    }
+
+    maven {
+        name = "helpchatRepoReleases"
+        url = "https://repo.extendedclip.com/releases/"
+    }
+
+    maven {
+        name = "k89q-repo"
+        url = "https://maven.enginehub.org/repo/"
+    }
+
+    maven {
+        name = "fancyinnovationsReleases"
+        url = "https://repo.fancyinnovations.com/releases"
+    }
+
+    maven {
+        name = "artillexStudiosReleases"
+        url = "https://repo.artillex-studios.com/releases/"
+    }
+
+    maven {
+        url = "https://repo.minebench.de"
+    }
+
+    maven {
+        url = "https://mvn-repo.arim.space/lesser-gpl3/"
+    }
+
+    maven {
+        name = "reposiliteRepositorySnapshots"
+        url = "https://repo.triumphteam.dev/snapshots/"
+    }
+
+    maven {
+        name = "okaeriReleases"
+        url = "https://storehouse.okaeri.eu/repository/maven-public/"
+    }
+}
+
+dependencies {
+    compileOnly("com.google.guava:guava:33.3.1-jre")
+    compileOnly(libs.spigotApi)
+    compileOnly(libs.lombok)
+    annotationProcessor(libs.lombok)
+
+    compileOnly(libs.smartspawner)
+    compileOnly(libs.decentholograms)
+    compileOnly(libs.fancyholograms)
+    compileOnly(libs.worldguard)
+    compileOnly(libs.skinsrestorerApi)
+    compileOnly(libs.axsellwands)
+
+    implementation(libs.dapi)
+    implementation(libs.anvilmenu)
+    implementation(libs.itemNbtApi)
+    implementation(libs.hikaricp)
+    implementation(libs.farmerV6)
+    compileOnly(libs.placeholderapi)
+    implementation(libs.vaultapi)
+
+}
+
+configurations.configureEach {
+    resolutionStrategy {
+        // Tell Gradle to use this version for ALL strict Guava constraints
+        force "com.google.guava:guava:33.3.1-jre"
+    }
+}
+
+tasks {
+    runServer {
+        // Configure the Minecraft version for our task.
+        // This is the only required configuration besides applying the plugin.
+        // Your plugin's jar (or shadowJar if present) will be used automatically.
+        minecraftVersion("1.21.8")
+    }
+}
+
+def targetJavaVersion = 21
+java {
+    def javaVersion = JavaVersion.toVersion(targetJavaVersion)
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
+    if (JavaVersion.current() < javaVersion) {
+        toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+
+    if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
+        options.release.set(targetJavaVersion)
+    }
+}
+
+processResources {
+    def props = [version: version]
+    inputs.properties props
+    filteringCharset 'UTF-8'
+    filesMatching('plugin.yml') {
+        expand props
+    }
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from(components.java)
+        }
+    }
+}
+
+shadowJar {
+    archiveClassifier = ""
+    relocate("org.nandayo.dapi", "nesoi.aysihuniks.libs.dapi")
+    relocate("de.tr7zw.changeme.nbtapi", "nesoi.aysihuniks.libs.nbtapi")
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+tasks.withType(Javadoc).configureEach {
+    options.encoding = 'UTF-8'
+}

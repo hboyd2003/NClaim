@@ -1,5 +1,5 @@
 name: NClaim
-version: ${project.version}
+version: ${version}
 main: nesoi.aysihuniks.nclaim.NClaim
 api-version: '1.16'
 authors: [ aysihuniks, yoshii01 ]
