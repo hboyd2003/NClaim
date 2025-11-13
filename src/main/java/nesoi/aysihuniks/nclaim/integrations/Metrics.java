@@ -21,15 +21,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Method;
-import java.net.URL;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -45,6 +39,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.NotNull;
 
 public class Metrics {
 
@@ -74,12 +69,13 @@ public class Metrics {
             // Inform the server owners about bStats
             config
                     .options()
-                    .header(
-                            "bStats (https://bStats.org) collects some basic information for plugin authors, like how\n"
-                                    + "many people use their plugin and their total player count. It's recommended to keep bStats\n"
-                                    + "enabled, but if you're not comfortable with this, you can turn this setting off. There is no\n"
-                                    + "performance penalty associated with having metrics enabled, and data sent to bStats is fully\n"
-                                    + "anonymous.")
+                    .setHeader(
+                            Collections.singletonList("""
+                                    bStats (https://bStats.org) collects some basic information for plugin authors, like how
+                                    many people use their plugin and their total player count. It's recommended to keep bStats
+                                    enabled, but if you're not comfortable with this, you can turn this setting off. There is no
+                                    performance penalty associated with having metrics enabled, and data sent to bStats is fully
+                                    anonymous."""))
                     .copyDefaults(true);
             try {
                 config.save(configFile);
@@ -95,7 +91,7 @@ public class Metrics {
         boolean isFolia = false;
         try {
             isFolia = Class.forName("io.papermc.paper.threadedregions.RegionizedServer") != null;
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
         metricsBase =
                 new // See https://github.com/Bastian/bstats-metrics/pull/126
@@ -212,7 +208,7 @@ public class Metrics {
          * @param platform The platform of the service.
          * @param serviceId The id of the service.
          * @param serverUuid The server uuid.
-         * @param enabled Whether or not data sending is enabled.
+         * @param enabled Whether data sending is enabled.
          * @param appendPlatformDataConsumer A consumer that receives a {@code JsonObjectBuilder} and
          *     appends all platform-specific data.
          * @param appendServiceDataConsumer A consumer that receives a {@code JsonObjectBuilder} and
@@ -223,10 +219,10 @@ public class Metrics {
          * @param checkServiceEnabledSupplier A supplier to check if the service is still enabled.
          * @param errorLogger A consumer that accepts log message and an error.
          * @param infoLogger A consumer that accepts info log messages.
-         * @param logErrors Whether or not errors should be logged.
-         * @param logSentData Whether or not the sent data should be logged.
-         * @param logResponseStatusText Whether or not the response status text should be logged.
-         * @param skipRelocateCheck Whether or not the relocate check should be skipped.
+         * @param logErrors Whether errors should be logged.
+         * @param logSentData Whether the sent data should be logged.
+         * @param logResponseStatusText Whether the response status text should be logged.
+         * @param skipRelocateCheck Whether the relocate check should be skipped.
          */
         public MetricsBase(
                 String platform,
@@ -243,20 +239,7 @@ public class Metrics {
                 boolean logSentData,
                 boolean logResponseStatusText,
                 boolean skipRelocateCheck) {
-            ScheduledThreadPoolExecutor scheduler =
-                    new ScheduledThreadPoolExecutor(
-                            1,
-                            task -> {
-                                Thread thread = new Thread(task, "bStats-Metrics");
-                                thread.setDaemon(true);
-                                return thread;
-                            });
-            // We want delayed tasks (non-periodic) that will execute in the future to be
-            // cancelled when the scheduler is shutdown.
-            // Otherwise, we risk preventing the server from shutting down even when
-            // MetricsBase#shutdown() is called
-            scheduler.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
-            this.scheduler = scheduler;
+            this.scheduler = getScheduledThreadPoolExecutor();
             this.platform = platform;
             this.serverUuid = serverUuid;
             this.serviceId = serviceId;
@@ -278,6 +261,24 @@ public class Metrics {
                 // bStats
                 startSubmitting();
             }
+        }
+
+        @NotNull
+        private static ScheduledThreadPoolExecutor getScheduledThreadPoolExecutor() {
+            ScheduledThreadPoolExecutor scheduler =
+                    new ScheduledThreadPoolExecutor(
+                            1,
+                            task -> {
+                                Thread thread = new Thread(task, "bStats-Metrics");
+                                thread.setDaemon(true);
+                                return thread;
+                            });
+            // We want delayed tasks (non-periodic) that will execute in the future to be
+            // cancelled when the scheduler is shutdown.
+            // Otherwise, we risk preventing the server from shutting down even when
+            // MetricsBase#shutdown() is called
+            scheduler.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
+            return scheduler;
         }
 
         public void addCustomChart(CustomChart chart) {
@@ -327,12 +328,12 @@ public class Metrics {
                             .map(customChart -> customChart.getRequestJsonObject(errorLogger, logErrors))
                             .filter(Objects::nonNull)
                             .toArray(JsonObjectBuilder.JsonObject[]::new);
-            serviceJsonBuilder.appendField("id", serviceId);
-            serviceJsonBuilder.appendField("customCharts", chartData);
-            baseJsonBuilder.appendField("service", serviceJsonBuilder.build());
-            baseJsonBuilder.appendField("serverUUID", serverUuid);
-            baseJsonBuilder.appendField("metricsVersion", METRICS_VERSION);
-            JsonObjectBuilder.JsonObject data = baseJsonBuilder.build();
+            JsonObjectBuilder.JsonObject data = serviceJsonBuilder.appendField("id", serviceId)
+                    .appendField("customCharts", chartData)
+                    .appendField("service", serviceJsonBuilder.build())
+                    .appendField("serverUUID", serverUuid)
+                    .appendField("metricsVersion", METRICS_VERSION)
+                    .build();
             scheduler.execute(
                     () -> {
                         try {
@@ -352,7 +353,7 @@ public class Metrics {
                 infoLogger.accept("Sent bStats metrics data: " + data.toString());
             }
             String url = String.format(REPORT_URL, platform);
-            HttpsURLConnection connection = (HttpsURLConnection) new URL(url).openConnection();
+            HttpsURLConnection connection = (HttpsURLConnection) new URI(url).toURL().openConnection();
             // Compress the data to save bandwidth
             byte[] compressedData = compress(data.toString());
             connection.setRequestMethod("POST");
@@ -700,7 +701,7 @@ public class Metrics {
     /**
      * An extremely simple JSON builder.
      *
-     * <p>While this class is neither feature-rich nor the most performant one, it's sufficient enough
+     * <p>While this class is neither feature-rich nor the most performant one, it's sufficient
      * for its use-case.
      */
     public static class JsonObjectBuilder {
@@ -854,7 +855,7 @@ public class Metrics {
         }
 
         /**
-         * Escapes the given string like stated in https://www.ietf.org/rfc/rfc4627.txt.
+         * Escapes the given string like stated in <a href="https://www.ietf.org/rfc/rfc4627.txt">RFC4627</a>.
          *
          * <p>This method escapes only the necessary characters '"', '\'. and '\u0000' - '\u001F'.
          * Compact escapes are not used (e.g., '\n' is escaped as "\u000a" and not as "\n").

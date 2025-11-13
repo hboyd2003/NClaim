@@ -73,7 +73,7 @@ public class LandExpansionMenu extends BaseMenu {
             }
         });
 
-        for(Scroller scroller : Scroller.SCROLLERS) {
+        for(Scroller scroller : Scroller.values()) {
             addButton(new Button() {
                 @Override
                 protected @NotNull Set<Integer> getSlots() {
@@ -82,7 +82,7 @@ public class LandExpansionMenu extends BaseMenu {
 
                 @Override
                 public @Nullable ItemStack getItem() {
-                    String directionKey = "scroll_button.directions." + scroller.getType().name();
+                    String directionKey = "scroll_button.directions." + scroller.name();
                     String localizedDirection = NClaim.inst().getGuiLangManager().getString(directionKey);
                     return ItemCreator.of(Material.OAK_BUTTON)
                             .name(getString("scroll_button.display_name").replace("{direction}", localizedDirection))
@@ -120,7 +120,6 @@ public class LandExpansionMenu extends BaseMenu {
             if (thatClaim == null) {
                 configPath = "expand";
                 material = getMaterial("expand");
-                clickable = true;
             } else {
                 if (thatClaim.equals(this.claim)) {
                     configPath = "claimed";
@@ -129,8 +128,8 @@ public class LandExpansionMenu extends BaseMenu {
                     configPath = "claimed_another_player";
                     material = getMaterial("claimed_another_player");
                 }
-                clickable = true;
             }
+            clickable = true;
         } else {
             if (!isAdjacentToClaim(thatChunk)) {
                 configPath = "not_adjacent";
@@ -259,41 +258,26 @@ public class LandExpansionMenu extends BaseMenu {
 
     private boolean canScroll(Scroller scroller) {
         if(scroller == null) return false;
-        switch (scroller.getType()) {
-            case LEFT:
-                return baseSlot % 9 < 7;
-            case RIGHT:
-                return baseSlot % 9 > 1;
-            case UP:
-                return baseSlot / 9 < 4;
-            case DOWN:
-                return baseSlot / 9 > 0;
-        }
-        return false;
+        return switch (scroller) {
+            case LEFT -> baseSlot % 9 < 7;
+            case RIGHT -> baseSlot % 9 > 1;
+            case UP -> baseSlot / 9 < 4;
+            case DOWN -> baseSlot / 9 > 0;
+        };
     }
 
-
     @Getter
-    private static class Scroller {
+    private enum Scroller {
+        LEFT(46, 1),
+        RIGHT(52, -1),
+        UP(50, 9),
+        DOWN(48, 9);
 
-        public static final Scroller LEFT = new Scroller(Type.LEFT, 46, +1);
-        public static final Scroller RIGHT = new Scroller(Type.RIGHT, 52, -1);
-        public static final Scroller UP = new Scroller(Type.UP, 50, +9);
-        public static final Scroller DOWN = new Scroller(Type.DOWN, 48, -9);
-
-        public static final Scroller[] SCROLLERS = new Scroller[] {LEFT, RIGHT, UP, DOWN};
-
-
-        private final Type type;
         private final int slot;
         private final int slotAddition;
-        protected Scroller(Type type, int slot, int slotAddition) {
-            this.type = type;
+        Scroller(int slot, int slotAddition) {
             this.slot = slot;
             this.slotAddition = slotAddition;
         }
-
-
-        enum Type { LEFT, RIGHT, UP, DOWN}
     }
 }

@@ -492,7 +492,7 @@ public final class NClaim extends JavaPlugin {
         if (days > 0) sb.append(days).append(d).append(" ");
         if (hours > 0) sb.append(hours).append(h).append(" ");
         if (minutes > 0) sb.append(minutes).append(m).append(" ");
-        if (seconds > 0 || sb.length() == 0) sb.append(seconds).append(s);
+        if (seconds > 0 || sb.isEmpty()) sb.append(seconds).append(s);
         return sb.toString().trim();
     }
 

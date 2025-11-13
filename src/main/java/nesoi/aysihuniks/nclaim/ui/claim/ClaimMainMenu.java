@@ -6,8 +6,6 @@ import nesoi.aysihuniks.nclaim.ui.claim.admin.AdminAllClaimMenu;
 import nesoi.aysihuniks.nclaim.ui.shared.BackgroundMenu;
 import nesoi.aysihuniks.nclaim.ui.shared.BaseMenu;
 import nesoi.aysihuniks.nclaim.ui.shared.ConfirmMenu;
-import nesoi.aysihuniks.nclaim.model.User;
-import nesoi.aysihuniks.nclaim.utils.MessageType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -17,7 +15,6 @@ import org.bukkit.inventory.ItemStack;
 import org.nandayo.dapi.guimanager.button.Button;
 import org.nandayo.dapi.guimanager.MenuType;
 import org.nandayo.dapi.guimanager.button.SingleSlotButton;
-import org.nandayo.dapi.message.ChannelType;
 
 import java.util.ArrayList;
 import java.util.List;

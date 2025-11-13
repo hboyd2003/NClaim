@@ -38,7 +38,7 @@ public class ManageClaimBlockMenu extends BaseMenu {
     private final @NotNull Claim claim;
     private final @NotNull Player player;
     private final ClaimBlockManager blockManager;
-    private int page = 0;
+    private int page;
 
     private static final int[] BLOCK_SLOTS = {28, 29, 30, 31, 32, 33, 34, 37, 38, 39, 40, 41, 42, 43};
     private static final int NEXT_PAGE_SLOT = 16;
@@ -47,7 +47,7 @@ public class ManageClaimBlockMenu extends BaseMenu {
     private List<ClaimBlockManager.ClaimBlockInfo> allowedBlocks() {
         List<ClaimBlockManager.ClaimBlockInfo> result = new ArrayList<>();
         for (ClaimBlockManager.ClaimBlockInfo info : blockManager.getAllBlockInfos()) {
-            if (info.enabled) result.add(info);
+            if (info.enabled()) result.add(info);
         }
         return result;
     }
@@ -190,10 +190,10 @@ public class ManageClaimBlockMenu extends BaseMenu {
 
                     @Override
                     public @Nullable ItemStack getItem() {
-                        ItemCreator creator = ItemCreator.of(info.material)
-                                .name("&e" + info.displayName);
+                        ItemCreator creator = ItemCreator.of(info.material())
+                                .name("&e" + info.displayName());
 
-                        if (info.lore != null && !info.lore.isEmpty()) {
+                        if (info.lore() != null && !info.lore().isEmpty()) {
 
                             double playerBalance;
                             if (NClaim.inst().getBalanceSystem() == Balance.VAULT) {
@@ -204,13 +204,13 @@ public class ManageClaimBlockMenu extends BaseMenu {
 
                             DecimalFormat df = new DecimalFormat("#.##");
 
-                            List<String> updatedLore = info.lore.stream()
+                            List<String> updatedLore = info.lore().stream()
                                     .map(line -> {
                                         if (line.contains("{cost}") || line.contains("{need_balance}")) {
-                                            String balanceColor = playerBalance >= info.price ? "&a" : "&c";
+                                            String balanceColor = playerBalance >= info.price() ? "&a" : "&c";
 
-                                            String formattedPrice = df.format(info.price);
-                                            String formattedNeededBalance = df.format(Math.min(playerBalance, info.price));
+                                            String formattedPrice = df.format(info.price());
+                                            String formattedNeededBalance = df.format(Math.min(playerBalance, info.price()));
 
                                             return line.replace("{cost}", formattedPrice)
                                                     .replace("{need_balance}", balanceColor + formattedNeededBalance);
@@ -221,7 +221,7 @@ public class ManageClaimBlockMenu extends BaseMenu {
                             creator.lore(updatedLore);
                         }
 
-                        if (claim.getClaimBlockType() == info.material) {
+                        if (claim.getClaimBlockType() == info.material()) {
                             creator.enchant(Enchantment.MENDING, 1);
                             creator.flags(ItemFlag.values());
                         }
@@ -231,12 +231,12 @@ public class ManageClaimBlockMenu extends BaseMenu {
 
                     @Override
                     public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
-                        if (info.permission != null && !info.permission.isEmpty() && !player.hasPermission(info.permission)) {
+                        if (info.permission() != null && !info.permission().isEmpty() && !player.hasPermission(info.permission())) {
                             ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.permission_denied"));
                             return;
                         }
 
-                        if (!claim.getPurchasedBlockTypes().contains(info.material)) {
+                        if (!claim.getPurchasedBlockTypes().contains(info.material())) {
                             double balance;
                             boolean useVault = NClaim.inst().getBalanceSystem() == Balance.VAULT;
 
@@ -246,45 +246,45 @@ public class ManageClaimBlockMenu extends BaseMenu {
                                 balance = User.getUser(player.getUniqueId()).getBalance();
                             }
 
-                            if (balance < info.price) {
+                            if (balance < info.price()) {
                                 ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.balance.not_enough"));
                                 return;
                             }
 
                             if (useVault) {
-                                NClaim.inst().getEconomy().withdrawPlayer(player, info.price);
+                                NClaim.inst().getEconomy().withdrawPlayer(player, info.price());
                             } else {
-                                User.getUser(player.getUniqueId()).setBalance(balance - info.price);
+                                User.getUser(player.getUniqueId()).setBalance(balance - info.price());
                             }
 
-                            claim.getPurchasedBlockTypes().add(info.material);
+                            claim.getPurchasedBlockTypes().add(info.material());
                             NClaim.inst().getClaimStorageManager().saveClaim(claim);
                             ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("claim.block.purchased")
-                                    .replace("{block}", info.displayName)
-                                    .replace("{price}", String.valueOf(info.price)));
+                                    .replace("{block}", info.displayName())
+                                    .replace("{price}", String.valueOf(info.price())));
                         }
 
-                        if (claim.getClaimBlockType() == info.material) {
+                        if (claim.getClaimBlockType() == info.material()) {
                             return;
                         }
 
                         Material oldBlockType = claim.getClaimBlockType();
                         ClaimBlockManager.ClaimBlockInfo oldBlockInfo = NClaim.inst().getClaimBlockManager().getBlockInfo(oldBlockType);
-                        String oldBlockDisplayName = oldBlockInfo != null ? oldBlockInfo.displayName : oldBlockType.name();
+                        String oldBlockDisplayName = oldBlockInfo != null ? oldBlockInfo.displayName() : oldBlockType.name();
 
                         player.playSound(player.getLocation(), DSound.BLOCK_BEACON_POWER_SELECT.parseSound(), 0.5f, 0.7f);
 
-                        claim.setClaimBlockType(info.material);
-                        claim.getClaimBlockLocation().getBlock().setType(info.material);
+                        claim.setClaimBlockType(info.material());
+                        claim.getClaimBlockLocation().getBlock().setType(info.material());
                         NClaim.inst().getClaimStorageManager().saveClaim(claim);
 
                         ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("claim.block.changed")
                                 .replace("{old_block}", oldBlockDisplayName)
-                                .replace("{new_block}", info.displayName));
+                                .replace("{new_block}", info.displayName()));
 
                         player.closeInventory();
 
-                        claim.getClaimBlockLocation().getWorld().spawnParticle(NClaim.inst().getParticle(DParticle.TOTEM_OF_UNDYING, DParticle.TOTEM), claim.getClaimBlockLocation(), 1);
+                        claim.getClaimBlockLocation().getWorld().spawnParticle(NClaim.getParticle(DParticle.TOTEM_OF_UNDYING, DParticle.TOTEM), claim.getClaimBlockLocation(), 1);
                     }
 
                 });

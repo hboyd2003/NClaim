@@ -6,7 +6,7 @@ import java.util.HashMap;
 
 public class ClaimSetting {
 
-    public final HashMap<Setting, Boolean> settings = new HashMap<Setting, Boolean>() {{
+    public final HashMap<Setting, Boolean> settings = new HashMap<>() {{
         put(Setting.CLAIM_PVP, false);
         put(Setting.TNT_DAMAGE, true);
         put(Setting.CREEPER_DAMAGE, true);

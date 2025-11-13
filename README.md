@@ -107,21 +107,21 @@ src/
 
 > Version column shows the version in which the placeholder was added (e.g. 2.0 means added in 2.0 and above)
 
-| Placeholder                                            | Description                                                                          | Version              |
-|--------------------------------------------------------|--------------------------------------------------------------------------------------|----------------------|
-| `%nclaim_player_balance%`                              | Shows the player's balance (Vault or the plugin's own system)                        | 1.0                 |
-| `%nclaim_get_string_path%`                             | Gets a string value from `config.yml` (`path` = config key)                          | 1.0                 |
-| `%nclaim_get_int_path%`                                | Gets an integer value from `config.yml` (`path` = config key)                        | 1.0                 |
-| `%nclaim_get_boolean_path%`                            | Gets a boolean value from `config.yml` (`path` = config key)                         | 1.0                 |
-| `%nclaim_get_list_path_index%`                         | Gets a list value (by index) from `config.yml` (`path` = key, `index` = position)    | 1.0                 |
-| `%nclaim_expiration_world_chunkX_chunkZ%`              | Shows the expiration time for the claim at X, Z chunk in given world                 | 1.0                 |
-| `%nclaim_owner_world_chunkX_chunkZ%`                   | Shows the owner of the claim at X, Z chunk in given world                            | 1.0                 |
-| `%nclaim_coop_count_world_chunkX_chunkZ%`              | Shows the co-op member count for the claim at X, Z chunk in given world              | 1.0                 |
-| `%nclaim_total_size_world_chunkX_chunkZ%`              | Shows the total chunk count for the claim at X, Z chunk in given world               | 1.0                 |
-| `%nclaim_claim_main_value_world_chunkX_chunkZ%`        | Gets the block value of the main claim chunk at given world, X, Z coordinates        | 2.0                 |
-| `%nclaim_claim_total_value_world_chunkX_chunkZ%`       | Gets the total value of all chunks in the claim at given world, X, Z coordinates     | 2.0                 |
-| `%nclaim_block_value_material%`                        | Gets the configured value for the specified block material (e.g. `diamond_block`)    | 2.0                 |
-| `%nclaim_owner%`                                       | Shows the claim owner of the chunk where the player is                               | 2.1                 | 
+| Placeholder                                      | Description                                                                       | Version |
+|--------------------------------------------------|-----------------------------------------------------------------------------------|---------|
+| `%nclaim_player_balance%`                        | Shows the player's balance (Vault or the plugin's own system)                     | 1.0     |
+| `%nclaim_get_string_path%`                       | Gets a string value from `config.yml` (`path` = config key)                       | 1.0     |
+| `%nclaim_get_int_path%`                          | Gets an integer value from `config.yml` (`path` = config key)                     | 1.0     |
+| `%nclaim_get_boolean_path%`                      | Gets a boolean value from `config.yml` (`path` = config key)                      | 1.0     |
+| `%nclaim_get_list_path_index%`                   | Gets a list value (by index) from `config.yml` (`path` = key, `index` = position) | 1.0     |
+| `%nclaim_expiration_world_chunkX_chunkZ%`        | Shows the expiration time for the claim at X, Z chunk in given world              | 1.0     |
+| `%nclaim_owner_world_chunkX_chunkZ%`             | Shows the owner of the claim at X, Z chunk in given world                         | 1.0     |
+| `%nclaim_coop_count_world_chunkX_chunkZ%`        | Shows the co-op member count for the claim at X, Z chunk in given world           | 1.0     |
+| `%nclaim_total_size_world_chunkX_chunkZ%`        | Shows the total chunk count for the claim at X, Z chunk in given world            | 1.0     |
+| `%nclaim_claim_main_value_world_chunkX_chunkZ%`  | Gets the block value of the main claim chunk at given world, X, Z coordinates     | 2.0     |
+| `%nclaim_claim_total_value_world_chunkX_chunkZ%` | Gets the total value of all chunks in the claim at given world, X, Z coordinates  | 2.0     |
+| `%nclaim_block_value_material%`                  | Gets the configured value for the specified block material (e.g. `diamond_block`) | 2.0     |
+| `%nclaim_owner%`                                 | Shows the claim owner of the chunk where the player is                            | 2.1     | 
 
 > Replace variables (like `path`, `index`, `world`, `chunkX`, `chunkZ`, `material`) with actual values.  
 > Example: `%nclaim_block_value_diamond_block%` or `%nclaim_get_list_blacklisted_worlds_0%` or `%nclaim_total_size_world_0_0%`
@@ -167,8 +167,7 @@ time_extension:
 # Database Configuration
 # Chooses between MySQL and SQLite for data storage
 database:
-  enable: false  # Set to true to use database storage instead of YAML
-  type: "mysql"  # Options: "mysql" or "sqlite"
+  type: "sqlite"  # Options: "mysql" or "sqlite"
 
   # SQLite Configuration
   sqlite:

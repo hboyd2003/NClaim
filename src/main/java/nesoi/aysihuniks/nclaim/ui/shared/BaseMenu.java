@@ -2,8 +2,6 @@ package nesoi.aysihuniks.nclaim.ui.shared;
 
 import nesoi.aysihuniks.nclaim.NClaim;
 import nesoi.aysihuniks.nclaim.utils.GuiLangManager;
-import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.ItemStack;
 import org.nandayo.dapi.guimanager.menu.Menu;

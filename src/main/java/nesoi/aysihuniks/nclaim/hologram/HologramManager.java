@@ -8,14 +8,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.nandayo.dapi.util.HexUtil;
 import org.nandayo.dapi.util.Util;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -295,15 +291,6 @@ public class HologramManager {
         return new HashSet<>(pendingWorlds);
     }
 
-    private static class ChunkInfo {
-        final String worldName;
-        final int x;
-        final int z;
-
-        ChunkInfo(String worldName, int x, int z) {
-            this.worldName = worldName;
-            this.x = x;
-            this.z = z;
-        }
+    private record ChunkInfo(String worldName, int x, int z) {
     }
 }

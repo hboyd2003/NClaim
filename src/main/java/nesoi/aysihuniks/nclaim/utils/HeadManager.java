@@ -21,6 +21,7 @@ import org.jetbrains.annotations.Nullable;
 import org.nandayo.dapi.util.Util;
 
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -90,11 +91,11 @@ public class HeadManager {
             } catch (Exception ignored) {}
         } else {
             try {
-                URL url_0 = new URL("https://api.mojang.com/users/profiles/minecraft/" + Bukkit.getOfflinePlayer(uuid).getName());
+                URL url_0 = new URI("https://api.mojang.com/users/profiles/minecraft/" + Bukkit.getOfflinePlayer(uuid).getName()).toURL();
                 InputStreamReader reader_0 = new InputStreamReader(url_0.openStream());
                 String id = JsonParser.parseReader(reader_0).getAsJsonObject().get("id").getAsString();
 
-                URL url_1 = new URL("https://sessionserver.mojang.com/session/minecraft/profile/" + id + "?unsigned=false");
+                URL url_1 = new URI("https://sessionserver.mojang.com/session/minecraft/profile/" + id + "?unsigned=false").toURL();
                 InputStreamReader reader_1 = new InputStreamReader(url_1.openStream());
                 JsonObject textureProperty = JsonParser.parseReader(reader_1).getAsJsonObject().get("properties").getAsJsonArray().get(0).getAsJsonObject();
                 texture = textureProperty.get("value").getAsString();

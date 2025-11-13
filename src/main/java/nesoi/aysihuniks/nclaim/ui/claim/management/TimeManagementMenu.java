@@ -303,14 +303,11 @@ public class TimeManagementMenu extends BaseMenu {
     }
 
     private String getTimeUnitString() {
-        switch (timeUnit) {
-            case 1:
-                return getString("hours_status");
-            case 2:
-                return getString("minutes_status");
-            default:
-                return getString("days_status");
-        }
+        return switch (timeUnit) {
+            case 1 -> getString("hours_status");
+            case 2 -> getString("minutes_status");
+            default -> getString("days_status");
+        };
     }
 
     private void adjustTime(int amount, boolean admin) {

@@ -12,12 +12,10 @@ public class ReloadCommand extends BaseCommand {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
-        if (!(sender instanceof Player)) {
+        if (!(sender instanceof Player player)) {
             ChannelType.CHAT.send(sender, "This command can only be used by players.");
             return true;
         }
-
-        Player player = (Player) sender;
 
         if (!player.hasPermission("nclaim.reload") && !player.hasPermission("nclaim.admin")) {
             ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.permission_denied"));

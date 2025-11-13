@@ -20,6 +20,7 @@ import org.nandayo.dapi.message.ChannelType;
 import org.nandayo.dapi.object.DParticle;
 
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -248,7 +249,7 @@ public class Claim {
                     payload = json.toString();
                 }
 
-                URL url = new URL(NClaim.inst().getNconfig().getWebhookUrl());
+                URL url = new URI(NClaim.inst().getNconfig().getWebhookUrl()).toURL();
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestMethod("POST");
                 connection.setRequestProperty("Content-Type", "application/json");
@@ -256,7 +257,6 @@ public class Claim {
                 byte[] out = payload.getBytes(StandardCharsets.UTF_8);
                 connection.getOutputStream().write(out);
 
-                int responseCode = connection.getResponseCode();
                 connection.disconnect();
             } catch (Exception e) {
                 plugin.getLogger().warning("Failed to send Discord webhook: " + e.getMessage());

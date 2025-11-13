@@ -89,14 +89,14 @@ public class ClaimExpirationManager {
     public String getTimeLeftColor(long secondsLeft) {
         for (TimeLeftThreshold t : plugin.getNconfig().getTimeLeftThresholds()) {
             long userValue = Config.getTimeUnitValue(secondsLeft, t.getUnit());
-            boolean match = false;
-            switch (t.getOperator()) {
-                case ">=": match = userValue >= t.getValue(); break;
-                case "<=": match = userValue <= t.getValue(); break;
-                case "<":  match = userValue < t.getValue(); break;
-                case ">":  match = userValue > t.getValue(); break;
-                case "==": match = userValue == t.getValue(); break;
-            }
+            boolean match = switch (t.getOperator()) {
+                case ">=" -> userValue >= t.getValue();
+                case "<=" -> userValue <= t.getValue();
+                case "<" -> userValue < t.getValue();
+                case ">" -> userValue > t.getValue();
+                case "==" -> userValue == t.getValue();
+                default -> false;
+            };
             if (match) return t.getColor();
         }
         return "&7";

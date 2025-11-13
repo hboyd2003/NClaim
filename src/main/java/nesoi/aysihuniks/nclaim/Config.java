@@ -18,6 +18,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -54,7 +55,6 @@ public class Config {
     private boolean showHologramTotalSize;
     private boolean showHologramEdit;
 
-    private boolean databaseEnabled;
     private String databaseType;
     private String sqliteFile;
     private String mysqlHost;
@@ -249,8 +249,7 @@ public class Config {
         if (config.isList("hologram_settings.time_left_thresholds")) {
             List<?> rawList = config.getList("hologram_settings.time_left_thresholds", new ArrayList<>());
             for (Object obj : rawList) {
-                if (!(obj instanceof java.util.Map)) continue;
-                java.util.Map<?, ?> map = (java.util.Map<?, ?>) obj;
+                if (!(obj instanceof Map<?, ?> map)) continue;
                 String thresholdStr = String.valueOf(map.get("threshold"));
                 String color = String.valueOf(map.get("color"));
                 String[] parts = thresholdStr.split(" ");
@@ -266,12 +265,12 @@ public class Config {
     }
 
     public static long getTimeUnitValue(long seconds, String unit) {
-        switch (unit) {
-            case "day": return seconds / 86400;
-            case "hour": return seconds / 3600;
-            case "minute": return seconds / 60;
-            default: return seconds;
-        }
+        return switch (unit) {
+            case "day" -> seconds / 86400;
+            case "hour" -> seconds / 3600;
+            case "minute" -> seconds / 60;
+            default -> seconds;
+        };
     }
 
     public double getTieredPrice(int chunkNumber) {

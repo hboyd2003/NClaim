@@ -199,7 +199,7 @@ public class ClaimLevelManager {
         }
 
         isProcessing = true;
-        ClaimCalculationRequest request = calculationQueue.remove(0);
+        ClaimCalculationRequest request = calculationQueue.removeFirst();
         currentlyCalculating = request.getPlayerName();
 
         sendMessageToPlayer(request.getPlayerId(), NClaim.inst().getLangManager().getString("claim.level.calculating_started"));

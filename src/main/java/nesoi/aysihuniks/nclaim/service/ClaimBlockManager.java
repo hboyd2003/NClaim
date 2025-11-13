@@ -66,21 +66,7 @@ public class ClaimBlockManager {
         return claimBlocks.values();
     }
 
-    public static class ClaimBlockInfo {
-        public final Material material;
-        public final String displayName;
-        public final double price;
-        public final List<String> lore;
-        public final String permission;
-        public final boolean enabled;
-
-        public ClaimBlockInfo(Material material, String displayName, double price, List<String> lore, String permission, boolean enabled) {
-            this.material = material;
-            this.displayName = displayName;
-            this.price = price;
-            this.lore = lore;
-            this.permission = permission;
-            this.enabled = enabled;
-        }
+    public record ClaimBlockInfo(Material material, String displayName, double price, List<String> lore,
+                                 String permission, boolean enabled) {
     }
 }

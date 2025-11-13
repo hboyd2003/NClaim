@@ -60,7 +60,7 @@ public class FarmerListener implements Listener {
                 .filter(c -> c.getRegionID().equals(farmerRegionId))
                 .findFirst();
 
-        if (!claim.isPresent()) return;
+        if (claim.isEmpty()) return;
 
         for (UUID coopPlayer : claim.get().getCoopPlayers()) {
             String playerName = NClaim.inst().getServer().getOfflinePlayer(coopPlayer).getName();

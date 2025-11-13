@@ -13,7 +13,7 @@ public class FancyHologramHandler implements HologramHandler {
     @Override
     public void createHologram(String hologramId, Location location, List<String> lines) {
         HologramManager manager = FancyHologramsPlugin.get().getHologramManager();
-        if (!manager.getHologram(hologramId).isPresent()) {
+        if (manager.getHologram(hologramId).isEmpty()) {
             TextHologramData hologramData = new TextHologramData(hologramId, location);
             hologramData.setText(lines);
             hologramData.setBillboard(Display.Billboard.CENTER);

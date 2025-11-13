@@ -141,7 +141,7 @@ webhook_settings:
 # Database Configuration
 # Chooses between MySQL and SQLite for data storage
 database:
-  type: "mysql"  # Options: "mysql" or "sqlite"
+  type: "sqlite"  # Options: "mysql" or "sqlite"
 
   # SQLite Configuration
   sqlite:

@@ -18,12 +18,10 @@ public class ChangeCommand extends BaseCommand {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         LangManager langManager = NClaim.inst().getLangManager();
-        if (!(sender instanceof Player)) {
+        if (!(sender instanceof Player player)) {
             ChannelType.CHAT.send(sender, langManager.getString("command.must_be_player"));
             return true;
         }
-
-        Player player = (Player) sender;
 
         if (!player.hasPermission("nclaim.change") && !player.hasPermission("nclaim.admin")) {
             ChannelType.CHAT.send(player, langManager.getString("command.permission.denied"));

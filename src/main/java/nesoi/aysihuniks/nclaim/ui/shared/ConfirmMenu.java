@@ -1,7 +1,6 @@
 package nesoi.aysihuniks.nclaim.ui.shared;
 
 import com.google.common.collect.Sets;
-import nesoi.aysihuniks.nclaim.NClaim;
 import nesoi.aysihuniks.nclaim.utils.MessageType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;

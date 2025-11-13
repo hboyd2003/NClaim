@@ -53,7 +53,7 @@ public class CoopPermission {
     public String serialize() {
         StringBuilder builder = new StringBuilder();
         for (Map.Entry<Permission, Boolean> entry : permissionStates.entrySet()) {
-            if (builder.length() > 0) {
+            if (!builder.isEmpty()) {
                 builder.append(",");
             }
             builder.append(entry.getKey().name())

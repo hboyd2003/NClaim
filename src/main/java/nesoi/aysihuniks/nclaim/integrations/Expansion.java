@@ -108,17 +108,13 @@ public class Expansion extends PlaceholderExpansion {
         String dataType = parts[1];
         String path = parts[2];
 
-        if ("string".equals(dataType)) {
-            return plugin.getConfigManager().getString(path, "Null");
-        } else if ("int".equals(dataType)) {
-            return String.valueOf(plugin.getConfigManager().getInt(path, 0));
-        } else if ("boolean".equals(dataType)) {
-            return String.valueOf(plugin.getConfigManager().getBoolean(path, false));
-        } else if ("list".equals(dataType)) {
-            return handleListConfig(parts, path);
-        } else {
-            return "Unknown config data type: " + dataType;
-        }
+        return switch (dataType) {
+            case "string" -> plugin.getConfigManager().getString(path, "Null");
+            case "int" -> String.valueOf(plugin.getConfigManager().getInt(path, 0));
+            case "boolean" -> String.valueOf(plugin.getConfigManager().getBoolean(path, false));
+            case "list" -> handleListConfig(parts, path);
+            case null, default -> "Unknown config data type: " + dataType;
+        };
     }
 
     private String handleListConfig(String[] parts, String path) {
@@ -147,12 +143,12 @@ public class Expansion extends PlaceholderExpansion {
         }
 
         ChunkAndClaim result = parseChunkAndClaim(parts[3], parts[4], parts[5]);
-        if (result.getError() != null) {
-            return new ChunkValueResult(0, result.getError());
+        if (result.error() != null) {
+            return new ChunkValueResult(0, result.error());
         }
 
-        Chunk mainChunk = result.getChunk();
-        Claim claim = result.getClaim();
+        Chunk mainChunk = result.chunk();
+        Claim claim = result.claim();
 
         if (mainChunk == null || (!includeAllChunks && claim == null)) {
             return new ChunkValueResult(0, "Chunk not found or not claimed");
@@ -167,12 +163,12 @@ public class Expansion extends PlaceholderExpansion {
 
     private @NotNull String handleClaimMainValue(String params) {
         ChunkValueResult result = getChunkValue(params, false);
-        return result.getError() != null ? result.getError() : String.valueOf(result.getValue());
+        return result.error() != null ? result.error() : String.valueOf(result.value());
     }
 
     private @NotNull String handleClaimTotalValue(String params) {
         ChunkValueResult result = getChunkValue(params, true);
-        return result.getError() != null ? result.getError() : String.valueOf(result.getValue());
+        return result.error() != null ? result.error() : String.valueOf(result.value());
     }
 
     private @NotNull String handleBlockValue(String params) {
@@ -200,27 +196,22 @@ public class Expansion extends PlaceholderExpansion {
 
         int worldIndex = parts.length - 3;
         ChunkAndClaim result = parseChunkAndClaim(parts[worldIndex], parts[worldIndex + 1], parts[worldIndex + 2]);
-        if (result.getError() != null) {
-            return result.getError();
+        if (result.error() != null) {
+            return result.error();
         }
 
-        Claim claim = result.getClaim();
+        Claim claim = result.claim();
         if (claim == null) {
             return "Claim not found";
         }
 
-        if ("expiration".equals(prefix)) {
-            return plugin.getClaimExpirationManager().getFormattedTimeLeft(claim);
-        } else if ("owner".equals(prefix)) {
-            OfflinePlayer claimOwner = Bukkit.getOfflinePlayer(claim.getOwner());
-            return claimOwner.getName() != null ? claimOwner.getName() : "Owner not found";
-        } else if ("coop_count".equals(prefix)) {
-            return String.valueOf(claim.getCoopPlayers().size());
-        } else if ("total_size".equals(prefix)) {
-            return String.valueOf(1 + claim.getLands().size());
-        } else {
-            return "Unknown placeholder prefix: " + prefix;
-        }
+        return switch (prefix) {
+            case "expiration" -> plugin.getClaimExpirationManager().getFormattedTimeLeft(claim);
+            case "owner" -> Bukkit.getOfflinePlayer(claim.getOwner()).getName() != null ? Bukkit.getOfflinePlayer(claim.getOwner()).getName() : "Owner not found";
+            case "coop_count" -> String.valueOf(claim.getCoopPlayers().size());
+            case "total_size" -> String.valueOf(1 + claim.getLands().size());
+            case null, default -> "Unknown placeholder prefix: " + prefix;
+        };
     }
 
     private ChunkAndClaim parseChunkAndClaim(String worldName, String chunkXStr, String chunkZStr) {

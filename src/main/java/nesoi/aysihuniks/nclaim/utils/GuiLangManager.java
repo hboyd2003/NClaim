@@ -61,16 +61,16 @@ public class GuiLangManager {
     }
 
     private Setting getSettingByKey(String key) {
-        switch (key) {
-            case "pvp": return Setting.CLAIM_PVP;
-            case "tnt_explosions": return Setting.TNT_DAMAGE;
-            case "creeper_explosions": return Setting.CREEPER_DAMAGE;
-            case "mob_attacks": return Setting.MOB_ATTACKING;
-            case "monster_spawning": return Setting.MONSTER_SPAWNING;
-            case "animal_spawning": return Setting.ANIMAL_SPAWNING;
-            case "villager_interactions": return Setting.VILLAGER_INTERACTION;
-            default: return null;
-        }
+        return switch (key) {
+            case "pvp" -> Setting.CLAIM_PVP;
+            case "tnt_explosions" -> Setting.TNT_DAMAGE;
+            case "creeper_explosions" -> Setting.CREEPER_DAMAGE;
+            case "mob_attacks" -> Setting.MOB_ATTACKING;
+            case "monster_spawning" -> Setting.MONSTER_SPAWNING;
+            case "animal_spawning" -> Setting.ANIMAL_SPAWNING;
+            case "villager_interactions" -> Setting.VILLAGER_INTERACTION;
+            default -> null;
+        };
     }
 
     public SettingCfg getSettingConfig(Setting setting) {
