@@ -46,7 +46,7 @@ public enum PermissionCategory {
             
     ENTITIES("Entity Permissions",
             Permission.INTERACT_VILLAGER, Permission.LEASH_MOBS,
-            Permission.RIDE_ENTITIES),
+            Permission.RIDE_ENTITIES, Permission.MISC_ENTITY_INTERACT),
 
     COOP_PERMISSIONS("Coop Permissions",
             Permission.OPEN_CLAIM_MENU, Permission.EXPAND_CLAIM,

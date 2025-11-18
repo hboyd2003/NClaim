@@ -55,6 +55,7 @@ public enum Permission {
     INTERACT_VILLAGER("Interact with villagers"),
     LEASH_MOBS("Leash mobs"),
     RIDE_ENTITIES("Ride entities"),
+    MISC_ENTITY_INTERACT("Misc entity interactions (e.g. shear sheep)"),
 
     OPEN_CLAIM_MENU("Interact with claim bedrock"),
     EXTEND_EXPIRATION("Extend claim expiration"),

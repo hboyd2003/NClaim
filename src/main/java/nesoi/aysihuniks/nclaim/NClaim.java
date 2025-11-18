@@ -17,6 +17,7 @@ import nesoi.aysihuniks.nclaim.model.UserManager;
 import nesoi.aysihuniks.nclaim.service.*;
 import nesoi.aysihuniks.nclaim.utils.*;
 import net.milkbowl.vault.economy.Economy;
+import org.bstats.bukkit.Metrics;
 import org.bukkit.*;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.EntityType;
@@ -359,7 +360,7 @@ public final class NClaim extends JavaPlugin {
     }
 
     private void setupMetrics() {
-        new Metrics(this, 24693);
+        Metrics metrics = new Metrics(this, 24693);
     }
 
 

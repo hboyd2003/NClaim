@@ -424,15 +424,13 @@ public class ClaimManager implements Listener {
         Entity entity = event.getRightClicked();
         Claim claim = Claim.getClaim(entity.getLocation().getChunk());
         if (cancelIfNotClaimMember(player, claim, event)) return;
-        Permission permission = null;
-        if (entity instanceof Villager) permission = Permission.INTERACT_VILLAGER;
-        else if (entity instanceof ItemFrame) permission = Permission.INTERACT_ITEM_FRAME;
-        else if (player.getInventory().getItemInMainHand().getType() == Material.SHEARS && entity instanceof Shearable) {
-            permission = Permission.BREAK_BLOCKS;
-        }
-        if (permission != null) {
-            cancelIfNoPermission(player, claim, permission, event, "interact");
-        }
+        Permission permission = switch (entity) {
+            case Villager ignored -> Permission.INTERACT_VILLAGER;
+            case ItemFrame ignored -> Permission.INTERACT_ITEM_FRAME;
+            default -> Permission.MISC_ENTITY_INTERACT;
+        };
+
+        cancelIfNoPermission(player, claim, permission, event, "interact");
     }
 
     @EventHandler

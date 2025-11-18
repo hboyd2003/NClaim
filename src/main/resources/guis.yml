@@ -462,6 +462,9 @@ guis:
       ride_entities:
         display_name: "&fRide Entities"
         material: "SADDLE"
+      misc_entity_interact:
+        display_name: "&fMisc Entity Interactions"
+        material: "SHEARS"
       open_claim_menu:
         display_name: "&fInteract With Claim Block"
         material: "BEDROCK"
