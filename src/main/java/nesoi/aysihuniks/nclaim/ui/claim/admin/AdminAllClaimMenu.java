@@ -293,7 +293,8 @@ public class AdminAllClaimMenu extends BaseMenu {
 
                 return ItemCreator.of(baseItem)
                         .name(getString(section + ".display_name")
-                                .replace("{owner}", owner.getName() != null ? owner.getName() : "Unknown"))
+                                .replace("{owner}", owner.getName() != null ? owner.getName() : "Unknown")
+                                .replace("{claim_name}", claim.getClaimName()))
                         .lore(lore)
                         .get();
             }

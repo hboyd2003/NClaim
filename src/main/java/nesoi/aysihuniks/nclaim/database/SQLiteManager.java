@@ -26,17 +26,33 @@ public class SQLiteManager implements DatabaseManager {
 
     private static final class SQLStatements {
         static final String CREATE_USERS_TABLE =
-                "CREATE TABLE IF NOT EXISTS users (uuid TEXT PRIMARY KEY, balance REAL DEFAULT 0, skinTexture TEXT)";
+                "CREATE TABLE IF NOT EXISTS users (" +
+                        "uuid TEXT PRIMARY KEY, " +
+                        "balance REAL DEFAULT 0, " +
+                        "skinTexture TEXT)";
 
         static final String CREATE_CLAIMS_TABLE =
                 "CREATE TABLE IF NOT EXISTS claims (" +
-                        "claim_id TEXT PRIMARY KEY, chunk_world TEXT, chunk_x INTEGER, chunk_z INTEGER, " +
-                        "created_at TEXT DEFAULT CURRENT_TIMESTAMP, expired_at TEXT NULL, owner TEXT, " +
-                        "claim_block_location TEXT, lands TEXT, claim_value BIGINT DEFAULT 0, claim_block_type TEXT, purchased_blocks TEXT)";
+                        "claim_id TEXT PRIMARY KEY, " +
+                        "chunk_world TEXT, " +
+                        "chunk_x INTEGER, " +
+                        "chunk_z INTEGER, " +
+                        "created_at TEXT DEFAULT CURRENT_TIMESTAMP, " +
+                        "expired_at TEXT NULL, " +
+                        "owner TEXT, " +
+                        "claim_block_location TEXT, " +
+                        "claim_name TEXT, " +
+                        "lands TEXT, " +
+                        "claim_value BIGINT DEFAULT 0, " +
+                        "claim_block_type TEXT, " +
+                        "purchased_blocks TEXT)";
 
         static final String CREATE_CLAIM_COOPS_TABLE =
                 "CREATE TABLE IF NOT EXISTS claim_coops (" +
-                        "claim_id TEXT, player_uuid TEXT, joined_at TEXT, permissions TEXT, " +
+                        "claim_id TEXT, " +
+                        "player_uuid TEXT, " +
+                        "joined_at TEXT, " +
+                        "permissions TEXT, " +
                         "PRIMARY KEY (claim_id, player_uuid))";
 
         static final String CREATE_CLAIM_SETTINGS_TABLE =
@@ -48,8 +64,8 @@ public class SQLiteManager implements DatabaseManager {
 
         static final String SAVE_CLAIM =
             "INSERT OR REPLACE INTO claims (claim_id, chunk_world, chunk_x, chunk_z, created_at, " +
-            "expired_at, owner, claim_block_location, lands, claim_value, claim_block_type, purchased_blocks) " +
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            "expired_at, owner, claim_block_location, claim_name, lands, claim_value, claim_block_type, purchased_blocks) " +
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         static final String LOAD_CLAIM = "SELECT * FROM claims WHERE claim_id = ?";
         static final String LOAD_ALL_CLAIMS = "SELECT * FROM claims";
         static final String DELETE_CLAIM = "DELETE FROM claims WHERE claim_id = ?";
@@ -247,14 +263,15 @@ public class SQLiteManager implements DatabaseManager {
         stmt.setString(6, getTimestamp(claim.getExpiredAt()).toString());
         stmt.setString(7, String.valueOf(claim.getOwner()));
         stmt.setString(8, NClaim.serializeLocation(claim.getClaimBlockLocation()));
-        stmt.setString(9, gson.toJson(claim.getLands()));
-        stmt.setLong(10, claim.getClaimValue());
-        stmt.setString(11, claim.getClaimBlockType().name());
+        stmt.setString(9, claim.getClaimName());
+        stmt.setString(10, gson.toJson(claim.getLands()));
+        stmt.setLong(11, claim.getClaimValue());
+        stmt.setString(12, claim.getClaimBlockType().name());
 
         List<String> purchasedBlockNames = claim.getPurchasedBlockTypes().stream()
                 .map(Material::name)
                 .collect(Collectors.toList());
-        stmt.setString(12, gson.toJson(purchasedBlockNames));
+        stmt.setString(13, gson.toJson(purchasedBlockNames));
     }
 
     private void saveClaimCoops(Connection conn, Claim claim) throws SQLException {
@@ -334,6 +351,7 @@ public class SQLiteManager implements DatabaseManager {
 
         Chunk chunk = world.getChunkAt(rs.getInt("chunk_x"), rs.getInt("chunk_z"));
         UUID claimId = UUID.fromString(rs.getString("claim_id"));
+        String claimName = rs.getString("claim_name");
 
         Date createdAt = Timestamp.valueOf(rs.getString("created_at"));
         Date expiredAt = Timestamp.valueOf(rs.getString("expired_at"));
@@ -377,6 +395,7 @@ public class SQLiteManager implements DatabaseManager {
                 expiredAt,
                 owner,
                 claimBlockLocation,
+                claimName,
                 claimValue,
                 claimBlockType,
                 lands,

@@ -127,6 +127,7 @@ public class ClaimManager implements Listener {
             OfflinePlayer owner = Bukkit.getOfflinePlayer(toClaim.getOwner());
             LangManager.sendSortedMessage(player, plugin.getLangManager().getString("move.claimed_chunk")
                     .replace("{owner}", owner.getName() != null ? owner.getName() : "Unknown")
+                    .replace("{claim_name}", toClaim.getClaimName())
                     .replace("{pvp_status}", pvpStatus));
         }
     }

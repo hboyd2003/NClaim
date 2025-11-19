@@ -60,7 +60,7 @@ public class ClaimSettingsMenu extends BaseMenu {
     }
 
     private void setupMenu() {
-        createInventory(MenuType.CHEST_6_ROWS, getString("title"));
+        createInventory(MenuType.CHEST_6_ROWS, getString("title").replace("{claim_name}", claim.getClaimName()));
         addNavigationButton();
         addSettingButtons();
         

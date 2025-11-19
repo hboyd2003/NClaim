@@ -2,13 +2,16 @@ package nesoi.aysihuniks.nclaim.ui.claim;
 
 import com.google.common.collect.Sets;
 import nesoi.aysihuniks.nclaim.NClaim;
+import nesoi.aysihuniks.nclaim.integrations.AnvilManager;
 import nesoi.aysihuniks.nclaim.ui.claim.admin.AdminAllClaimMenu;
 import nesoi.aysihuniks.nclaim.ui.shared.BackgroundMenu;
 import nesoi.aysihuniks.nclaim.ui.shared.BaseMenu;
 import nesoi.aysihuniks.nclaim.ui.shared.ConfirmMenu;
+import nesoi.aysihuniks.nclaim.utils.MessageType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.nandayo.dapi.message.ChannelType;
 import org.nandayo.dapi.util.ItemCreator;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
@@ -48,8 +51,6 @@ public class ClaimMainMenu extends BaseMenu {
 
     private void addBuyClaimButton() {
         addButton(new Button() {
-
-
             @Override
             public @NotNull Set<Integer> getSlots() {
                 return Sets.newHashSet(11);
@@ -80,10 +81,26 @@ public class ClaimMainMenu extends BaseMenu {
     }
 
     private void handleBuyClaimClick(Player player) {
+        MessageType.SEARCH_OPEN.playSound(player);
+        new AnvilManager(player, getString("set_name_title"),
+                (text) -> {
+                    if (text == null || text.isEmpty()) {
+                        ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.enter_a_name"));
+                        MessageType.FAIL.playSound(player);
+                        player.closeInventory();
+                        return;
+                    }
+
+                    showBuyClaimConfirmMenu(player, text);
+                });
+
+    }
+
+    private void showBuyClaimConfirmMenu(Player player, String claimName) {
         Consumer<String> onFinish = (result) -> {
             if ("confirmed".equals(result)) {
                 player.closeInventory();
-                NClaim.inst().getClaimService().buyNewClaim(player);
+                NClaim.inst().getClaimService().buyNewClaim(player, claimName);
             } else if ("declined".equals(result)) {
                 new ClaimMainMenu(player);
             }
@@ -93,7 +110,8 @@ public class ClaimMainMenu extends BaseMenu {
                 NClaim.inst().getGuiLangManager().getString("confirm_menu",  "children.buy_new_claim.display_name"),
                 NClaim.inst().getGuiLangManager().getStringList("confirm_menu", "children.buy_new_claim.lore")
                         .stream()
-                        .map(s -> s.replace("{price}", String.valueOf(NClaim.inst().getNconfig().getClaimBuyPrice())))
+                        .map(s -> s.replace("{price}", String.valueOf(NClaim.inst().getNconfig().getClaimBuyPrice()))
+                                .replace("{claim_name}", claimName))
                         .collect(Collectors.toList()),
                 onFinish);
     }

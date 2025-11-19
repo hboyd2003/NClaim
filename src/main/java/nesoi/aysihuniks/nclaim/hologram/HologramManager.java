@@ -231,7 +231,8 @@ public class HologramManager {
         Config config = NClaim.inst().getNconfig();
 
         if (config.isShowHologramTitle()) {
-            lines.add(plugin.getLangManager().getString("hologram.title"));
+            lines.add(plugin.getLangManager().getString("hologram.title")
+                    .replace("{claim_name}", claim.getClaimName()));
         }
 
         if (config.isShowHologramOwner()) {

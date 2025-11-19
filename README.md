@@ -121,6 +121,8 @@ src/
 | `%nclaim_claim_main_value_world_chunkX_chunkZ%`  | Gets the block value of the main claim chunk at given world, X, Z coordinates     | 2.0     |
 | `%nclaim_claim_total_value_world_chunkX_chunkZ%` | Gets the total value of all chunks in the claim at given world, X, Z coordinates  | 2.0     |
 | `%nclaim_block_value_material%`                  | Gets the configured value for the specified block material (e.g. `diamond_block`) | 2.0     |
+| `%nclaim_claim_name_world_chunkX_chunkZ%`        | Shows the name of the claim at X, Z chunk in given world                          | 2.0     |
+| `%nclaim_name%`                                  | Shows the claim name of the chunk where the player is                             | 2.1     | 
 | `%nclaim_owner%`                                 | Shows the claim owner of the chunk where the player is                            | 2.1     | 
 
 > Replace variables (like `path`, `index`, `world`, `chunkX`, `chunkZ`, `material`) with actual values.  

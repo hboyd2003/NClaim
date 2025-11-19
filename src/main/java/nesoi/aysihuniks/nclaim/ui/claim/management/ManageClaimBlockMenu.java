@@ -1,9 +1,11 @@
 package nesoi.aysihuniks.nclaim.ui.claim.management;
 
 import com.google.common.collect.Sets;
+import me.clip.placeholderapi.PlaceholderAPI;
 import nesoi.aysihuniks.nclaim.NClaim;
 import nesoi.aysihuniks.nclaim.enums.Balance;
 import nesoi.aysihuniks.nclaim.enums.Permission;
+import nesoi.aysihuniks.nclaim.integrations.AnvilManager;
 import nesoi.aysihuniks.nclaim.model.Claim;
 import nesoi.aysihuniks.nclaim.model.User;
 import nesoi.aysihuniks.nclaim.service.ClaimBlockManager;
@@ -69,7 +71,7 @@ public class ManageClaimBlockMenu extends BaseMenu {
     }
 
     private void setup() {
-        createInventory(MenuType.CHEST_6_ROWS, getString("title"));
+        createInventory(MenuType.CHEST_6_ROWS, getString("title").replace("{claim_name}", claim.getClaimName()));
 
         if (NClaim.inst().getNconfig().isEnableTeleportToClaim()) {
             addButton(new Button() {
@@ -159,7 +161,9 @@ public class ManageClaimBlockMenu extends BaseMenu {
 
                 new ConfirmMenu(player,
                         NClaim.inst().getGuiLangManager().getString("confirm_menu.children.move_claim_block.display_name"),
-                        NClaim.inst().getGuiLangManager().getStringList("confirm_menu.children.move_claim_block.lore"),
+                        NClaim.inst().getGuiLangManager().getStringList("confirm_menu.children.move_claim_block.lore")
+                                .stream().map(line -> line.replace("{claim_name}", claim.getClaimName()))
+                                .collect(Collectors.toList()),
                         result -> {
                             if ("confirmed".equals(result)) {
                                 player.closeInventory();
@@ -316,6 +320,43 @@ public class ManageClaimBlockMenu extends BaseMenu {
                     }
                 });
             }
+
+            addButton(new Button() {
+                @Override
+                protected @NotNull Set<Integer> getSlots() {
+                    return Sets.newHashSet(16);
+                }
+
+                @Override
+                public @Nullable ItemStack getItem() {
+                    return ItemCreator.of(getMaterial("set_claim_name"))
+                            .name(getString("set_claim_name.display_name"))
+                            .lore(getStringList("set_claim_name.lore"))
+                            .get();
+                }
+
+                @Override
+                public void onClick(@NotNull Player p, @NotNull ClickType clickType) {
+                    if (!NClaim.inst().getClaimCoopManager().hasPermission(player, claim, Permission.SET_CLAIM_NAME)) {
+                        ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.permission_denied"));
+                        return;
+                    }
+
+                    MessageType.SEARCH_OPEN.playSound(player);
+                    new AnvilManager(player, getString("set_claim_name.anvil_name"), (text) -> {
+                        if (text == null || text.isEmpty()) {
+                            ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.enter_a_name"));
+                            MessageType.FAIL.playSound(player);
+                            new ManageClaimBlockMenu(claim, player, page);
+                            return;
+                        }
+
+                        claim.setClaimName(text);
+                        MessageType.CONFIRM.playSound(player);
+                        new ManageClaimBlockMenu(claim, player, page);
+                    });
+                }
+            });
         }
 
         addButton(new Button() {

@@ -38,6 +38,36 @@ public class Claim {
             @NotNull Date expiredAt,
             @NotNull UUID owner,
             @NotNull Location claimBlockLocation,
+            @NotNull String claimName,
+            long claimValue,
+            Material claimBlockType,
+            ClaimSetting settings,
+            Set<Material> purchasedBlockTypes) {
+        this(claimId,
+                chunk,
+                createdAt,
+                expiredAt,
+                owner,
+                claimBlockLocation,
+                claimName,
+                claimValue,
+                claimBlockType,
+                new ArrayList<>(),
+                new ArrayList<>(),
+                new HashMap<>(),
+                new HashMap<>(),
+                settings,
+                purchasedBlockTypes);
+    }
+
+    public Claim(
+            @NotNull UUID claimId,
+            @NotNull Chunk chunk,
+            @NotNull Date createdAt,
+            @NotNull Date expiredAt,
+            @NotNull UUID owner,
+            @NotNull Location claimBlockLocation,
+            @NotNull String claimName,
             long claimValue,
             Material claimBlockType,
             Collection<String> lands,
@@ -54,6 +84,7 @@ public class Claim {
         this.expiredAt = expiredAt;
         this.owner = owner;
         this.claimBlockLocation = claimBlockLocation;
+        this.claimName = claimName;
         this.claimBlockType = claimBlockType;
         this.claimValue = claimValue;
         this.lands = lands;
@@ -75,6 +106,7 @@ public class Claim {
     private @NotNull Date expiredAt;
     private @NotNull UUID owner;
     private @NotNull Location claimBlockLocation;
+    private @NotNull String claimName;
     private long claimValue;
     private Material claimBlockType;
     private final Collection<String> lands;
@@ -322,6 +354,11 @@ public class Claim {
 
     public Optional<Player> getOwnerPlayer() {
         return Optional.ofNullable(Bukkit.getPlayer(owner));
+    }
+
+    public void setClaimName(@NotNull String name) {
+        if (name.isEmpty()) throw new IllegalArgumentException("Name cannot be empty");
+        this.claimName = name;
     }
 
     @ApiStatus.Internal

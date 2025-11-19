@@ -40,6 +40,7 @@ public class MySQLManager implements DatabaseManager {
         "expired_at TIMESTAMP NULL, " +
         "owner VARCHAR(36), " +
         "claim_block_location TEXT, " +
+        "claim_name TEXT, " +
         "lands TEXT, " +
         "claim_value BIGINT DEFAULT 0," +
         "claim_block_type VARCHAR(50)," +
@@ -70,8 +71,8 @@ public class MySQLManager implements DatabaseManager {
 
     private static final String SAVE_CLAIM =
         "INSERT INTO claims (claim_id, chunk_world, chunk_x, chunk_z, created_at, expired_at, " +
-        "owner, claim_block_location, lands, claim_value, claim_block_type, purchased_blocks) " +
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) " +
+        "owner, claim_block_location, claim_name, lands, claim_value, claim_block_type, purchased_blocks) " +
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) " +
         "ON DUPLICATE KEY UPDATE " +
         "expired_at=?, owner=?, claim_block_location=?, lands=?, claim_value=?, " +
         "claim_block_type=?, purchased_blocks=?";
@@ -264,22 +265,15 @@ public class MySQLManager implements DatabaseManager {
             stmt.setTimestamp(6, new Timestamp(claim.getExpiredAt().getTime()));
             stmt.setString(7, claim.getOwner().toString());
             stmt.setString(8, NClaim.serializeLocation(claim.getClaimBlockLocation()));
-            stmt.setString(9, gson.toJson(claim.getLands()));
-            stmt.setLong(10, claim.getClaimValue());
-            stmt.setString(11, claim.getClaimBlockType().name());
+            stmt.setString(9, claim.getClaimName());
+            stmt.setString(10, gson.toJson(claim.getLands()));
+            stmt.setLong(11, claim.getClaimValue());
+            stmt.setString(12, claim.getClaimBlockType().name());
 
             List<String> purchasedBlockNames = claim.getPurchasedBlockTypes().stream()
                     .map(Material::name)
                     .collect(Collectors.toList());
-            stmt.setString(12, gson.toJson(purchasedBlockNames));
-
-            stmt.setTimestamp(13, new Timestamp(claim.getExpiredAt().getTime()));
-            stmt.setString(14, claim.getOwner().toString());
-            stmt.setString(15, NClaim.serializeLocation(claim.getClaimBlockLocation()));
-            stmt.setString(16, gson.toJson(claim.getLands()));
-            stmt.setLong(17, claim.getClaimValue());
-            stmt.setString(18, claim.getClaimBlockType().name());
-            stmt.setString(19, gson.toJson(purchasedBlockNames));
+            stmt.setString(13, gson.toJson(purchasedBlockNames));
 
             stmt.executeUpdate();
         }
@@ -405,6 +399,7 @@ public class MySQLManager implements DatabaseManager {
         Date expiredAt = new Date(rs.getTimestamp("expired_at").getTime());
         UUID owner = (UUID) rs.getObject("owner_id");
         Location claimBlockLocation = NClaim.deserializeLocation(rs.getString("claim_block_location"));
+        String claimName = rs.getString("claim_name");
         long claimValue = rs.getLong("claim_value");
         Material claimBlockType = Material.valueOf(rs.getString("claim_block_type"));
 
@@ -435,6 +430,7 @@ public class MySQLManager implements DatabaseManager {
                 expiredAt,
                 owner,
                 claimBlockLocation,
+                claimName,
                 claimValue,
                 claimBlockType,
                 lands,

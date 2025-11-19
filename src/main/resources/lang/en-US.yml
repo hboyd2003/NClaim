@@ -5,6 +5,7 @@ command:
   wrong_usage: "{prefix} &fNeed help? Use &e/nclaim <help/?> &fto see all available commands."
   enter_a_valid_number: "{prefix} &cPlease enter a valid number."
   enter_a_player: "{prefix} &cPlease enter a player name."
+  enter_a_name: "{prefix} &cPlease enter a name."
   player_data_not_found: "{prefix} &cPlayer data not found. &7Please rejoin and try again."
   invalid_material: "{prefix} &c{material} &fis not a valid material."
   invalid_block_type: "{prefix} &c{block} &fis not a valid block type."
@@ -65,6 +66,8 @@ claim:
   too_close_to_other_claim: "{prefix} &cYou cannot claim this chunk! You are too close to another player's claim."
   no_owner: "Owner not found." # Aka: Unclaimed
   owner: "&e{owner}"
+  no_name: "Name not found."
+  name: "&e{claim_name}"
   max_reached: "{prefix} &cYou have reached the maximum claim limit."
   not_found: "{prefix} &cYou don't own any claims and aren't added to any claims."
   in_blacklisted_region_or_world: "{prefix} &cYou can't do that in a blacklisted world or region."
@@ -115,12 +118,12 @@ claim:
 
 move:
   unclaimed_chunk: "ACTION_BAR=&7Unclaimed"
-  claimed_chunk: "ACTION_BAR=&e{owner} &7- {pvp_status}"
+  claimed_chunk: "ACTION_BAR=&e{claim_name} &7- &e{owner} &7- {pvp_status}"
   pvp_enabled: "&cPvP"
   pvp_disabled: "&aPvP"
 
 hologram:
-  title: "&6⚔ Protected Area ⚔"
+  title: "&6{claim_name}"
   owner: "&fOwner: &e{owner}"
   time_left:
     text: "&fTime Left: &e{time_left}"

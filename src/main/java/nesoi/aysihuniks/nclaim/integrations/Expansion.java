@@ -78,9 +78,13 @@ public class Expansion extends PlaceholderExpansion {
             return handleClaimCount(params, player);
         }
 
-        if (params.startsWith("expiration_") || params.startsWith("owner_") ||
+        if (params.startsWith("expiration_") || params.startsWith("owner_") || params.startsWith("claim_name_") ||
                 params.startsWith("coop_count_") || params.startsWith("total_size_")) {
             return handleClaimInfo(params);
+        }
+
+        if (params.equals("name")) {
+            return handleCurrentChunkName(player);
         }
 
         if (params.equals("owner")) {
@@ -192,6 +196,8 @@ public class Expansion extends PlaceholderExpansion {
             prefix = "coop_count";
         } else if ("total".equals(prefix) && "size".equals(parts[1])) {
             prefix = "total_size";
+        } else if ("claim".equals(prefix) && "owner".equals(parts[1])) {
+            prefix = "claim_name";
         }
 
         int worldIndex = parts.length - 3;
@@ -210,6 +216,7 @@ public class Expansion extends PlaceholderExpansion {
             case "owner" -> Bukkit.getOfflinePlayer(claim.getOwner()).getName() != null ? Bukkit.getOfflinePlayer(claim.getOwner()).getName() : "Owner not found";
             case "coop_count" -> String.valueOf(claim.getCoopPlayers().size());
             case "total_size" -> String.valueOf(1 + claim.getLands().size());
+            case "claim_name" -> claim.getClaimName();
             case null, default -> "Unknown placeholder prefix: " + prefix;
         };
     }
@@ -273,4 +280,14 @@ public class Expansion extends PlaceholderExpansion {
         return owner.getName() != null ? NClaim.inst().getLangManager().getString("claim.owner").replace("{owner}", owner.getName()) : NClaim.inst().getLangManager().getString("claim.no_owner");
     }
 
+    private String handleCurrentChunkName(Player player) {
+        if (player == null) return null;
+        Chunk chunk = player.getLocation().getChunk();
+        Claim claim = Claim.getClaim(chunk);
+        if (claim == null) {
+            return NClaim.inst().getLangManager().getString("claim.no_name");
+        }
+
+        return NClaim.inst().getLangManager().getString("claim.name").replace("{claim_name}", claim.getClaimName());
+    }
 }

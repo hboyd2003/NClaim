@@ -52,7 +52,7 @@ public enum PermissionCategory {
             Permission.OPEN_CLAIM_MENU, Permission.EXPAND_CLAIM,
             Permission.ADD_COOP, Permission.EXTEND_EXPIRATION,
             Permission.MANAGE_SETTINGS, Permission.MANAGE_CLAIM_BLOCK_TYPES,
-            Permission.MOVE_CLAIM_BLOCK);
+            Permission.MOVE_CLAIM_BLOCK, Permission.SET_CLAIM_NAME);
 
     private final String displayName;
     private final Set<Permission> permissions;

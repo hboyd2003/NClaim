@@ -36,7 +36,9 @@ public class ClaimService {
     private static final Map<UUID, Long> lastClaimTime = new ConcurrentHashMap<>();
     private static final long CLAIM_COOLDOWN_MILLIS = NClaim.inst().getNconfig().getLastClaimTime() * 60 * 1000;
 
-    public void buyNewClaim(Player player) {
+    public void buyNewClaim(Player player, @NotNull String claimName) {
+        if (claimName.isEmpty())
+            throw new IllegalArgumentException("Claim name cannot be empty");
 
         long now = System.currentTimeMillis();
         Long last = lastClaimTime.get(player.getUniqueId());
@@ -65,7 +67,7 @@ public class ClaimService {
             return;
         }
 
-        createNewClaim(player, chunk);
+        createNewClaim(player, chunk, claimName);
 
         lastClaimTime.put(player.getUniqueId(), now);
 
@@ -247,7 +249,10 @@ public class ClaimService {
         return handlePayment(player, user, claimPrice);
     }
 
-    private void createNewClaim(Player player, Chunk chunk) {
+    private void createNewClaim(@NotNull Player player, @NotNull Chunk chunk, @NotNull String claimName) {
+        if (claimName.isEmpty())
+            throw new IllegalArgumentException("Claim name cannot be empty");
+
         UUID claimId = UUID.randomUUID();
         Date createdAt = new Date();
         Date expiredAt = calculateExpirationDate();
@@ -275,12 +280,9 @@ public class ClaimService {
                 expiredAt,
                 player.getUniqueId(),
                 claimBlockLocation,
+                claimName,
                 initialValue,
                 defaultBlockType,
-                new ArrayList<>(),
-                new ArrayList<>(),
-                new HashMap<>(),
-                new HashMap<>(),
                 claimSetting,
                 purchasedBlockTypes
         );
@@ -293,7 +295,7 @@ public class ClaimService {
             return;
         }
 
-        if (plugin.getHologramManager() != null) {
+        if (plugin.getHologramManager() != null && claimSetting.isEnabled(Setting.SHOW_HOLOGRAM)) {
             plugin.getHologramManager().createHologram(claimBlockLocation);
         }
 

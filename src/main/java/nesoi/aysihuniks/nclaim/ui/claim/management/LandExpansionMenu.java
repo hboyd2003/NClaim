@@ -50,7 +50,7 @@ public class LandExpansionMenu extends BaseMenu {
     }
 
     private void setupMenu(Player player) {
-        createInventory(MenuType.CHEST_6_ROWS, getString("title"));
+        createInventory(MenuType.CHEST_6_ROWS, getString("title").replace("{claim_name}", claim.getClaimName()));
 
         this.addButton(new Button() {
             @Override
@@ -190,7 +190,7 @@ public class LandExpansionMenu extends BaseMenu {
                             NClaim.inst().getGuiLangManager().getString("confirm_menu.children.claim_expand.display_name"),
                             NClaim.inst().getGuiLangManager().getStringList("confirm_menu.children.claim_expand.lore")
                                     .stream()
-                                    .map(s -> s.replace("{price}", String.valueOf(calculateChunkPrice(thatChunk))))
+                                    .map(s -> s.replace("{price}", String.valueOf(calculateChunkPrice(thatChunk))).replace("{claim_name", claim.getClaimName()))
                                     .collect(Collectors.toList()),
                             onFinish);
                 } else if (clickType.isRightClick() && getInvItem(slot).getType() == Material.GREEN_WOOL || clickType.isRightClick() && getInvItem(slot).getType() == Material.BROWN_WOOL) {

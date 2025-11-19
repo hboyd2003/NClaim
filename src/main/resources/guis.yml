@@ -34,6 +34,7 @@ guis:
     admin:
       display_name: "&6Admin Menu"
       material: "COMMAND_BLOCK"
+    set_name_title: "Enter new claim name"
     buy_claim:
       display_name: "&6Buy a Claim"
       material: "EMERALD"
@@ -65,7 +66,7 @@ guis:
       player: "Player"
       coop: "Co-op"
     own_claims:
-      display_name: "&6Claim: &e{claim_id}"
+      display_name: "&6Claim: &e{claim_name}"
       material: "GRASS_BLOCK"
       lore:
         - ""
@@ -75,7 +76,7 @@ guis:
         - ""
         - "&7Click to manage"
     coop_claims:
-      display_name: "&6Co-op Claim: &e{claim_id}"
+      display_name: "&6Co-op Claim: &e{claim_name}"
       material: "OAK_SIGN"
       lore:
         - ""
@@ -87,7 +88,7 @@ guis:
 
   # Claim Management Menu - The menu that opens when interacting with the claim block.
   claim_management_menu:
-    title: "Manage Claim"
+    title: "Manage Claim - {claim_name}"
     expand:
       display_name: "&6Expand Claim"
       material: "GRASS_BLOCK"
@@ -152,7 +153,7 @@ guis:
 
   # Claim Expand Menu - The menu that opens after interacting with the claim block and clicking the 'Expand Claim' button.
   claim_expand_menu:
-    title: "Expand Claim"
+    title: "Expand Claim - {claim_name}"
     scroll_button:
       display_name: "&fScroll {direction}"
     center:
@@ -190,7 +191,7 @@ guis:
 
   # Claim Time Management Menu - The menu that opens after interacting with the claim block and clicking the 'Manage Expiration' button.
   claim_time_management_menu:
-    title: "Manage Time"
+    title: "Manage Time - {claim_name}"
     claim_info:
       display_name: "&6Duration Info"
       material: "ITEM_FRAME"
@@ -233,7 +234,7 @@ guis:
       material: "RED_CONCRETE"
 
   claim_manage_coop_menu:
-    title: "Co-op Members"
+    title: "Co-op Members - {claim_name}"
     offline: "&7(Offline)"
     add_coop:
       display_name: "&aAdd Member"
@@ -264,7 +265,7 @@ guis:
         - "&eClick to modify"
 
   manage_coop_player_permission_menu:
-    title: "Manage {player}"
+    title: "Manage {player} - {claim_name}"
     click_to_view: "&eClick to view"
     right_click_toggle: "&eRight-click to toggle all"
     offline: "&7(Offline)"
@@ -483,13 +484,16 @@ guis:
       move_claim_block:
         display_name: "&fMove Claim Block"
         material: "SHULKER_BOX"
+      set_claim_name:
+        display_name: "&fSet Claim Name"
+        material: "FEATHER"
       manage_settings:
         display_name: "&fManage Claim Settings"
         material: "BOOK"
 
 
   claim_settings_menu:
-    title: "Claim Settings"
+    title: "Claim Settings - {claim_name}"
     settings:
       pvp:
         default_value: false
@@ -584,7 +588,7 @@ guis:
           - "&eClick to toggle"
 
   claim_block_management_menu:
-    title: "Claim Block Management"
+    title: "Claim Block Management - {claim_name}"
     teleport:
       display_name: "&6Teleport to Claim"
       material: "ENDER_PEARL"
@@ -601,6 +605,15 @@ guis:
         - "&fMoves the claim block to your location"
         - ""
         - "&eClick to proceed"
+    set_claim_name:
+      display_name: "&6Set Claim Name"
+      anvil_name: "Enter Claim Name"
+      material: "FEATHER"
+      lore:
+        - ""
+        - "&fSets a new claim name"
+        - ""
+        - "&eClick to enter a new name"
 
   admin_menu:
     all_claims_menu:
@@ -623,7 +636,7 @@ guis:
         material: "BARRIER"
       claim_items:
         selected:
-          display_name: "&a{owner}'s Claim &7(Selected)"
+          display_name: "&a{owner} &e- &a{claim_name} &7(Selected)"
           material: "YELLOW_STAINED_GLASS_PANE"
           lore:
             - ""
@@ -637,7 +650,7 @@ guis:
             - "&eShift Click &7- &fTeleport"
             - "&eRight Click &7- &fDeselect"
         unselected:
-          display_name: "&6{owner}'s Claim"
+          display_name: "&6{owner} &e- &6{claim_name}"
           material: "WHITE_STAINED_GLASS_PANE"
           lore:
             - ""
@@ -669,7 +682,7 @@ guis:
           - ""
           - "&fIf you approve this action:"
           - "&7• &e${price} &fwill be deducted from your balance"
-          - "&7• &fYou will receive a &enew Claim"
+          - "&7• &fYou will receive a &enew Claim &fnamed \"&e{claim_name}&f\""
           - ""
           - "&aClick to green dye for confirm purchase"
           - "&cClick to red dye for cancel purchase"
@@ -679,7 +692,7 @@ guis:
           - ""
           - "&fIf you approve this action:"
           - "&7• &fCost: &e${price}"
-          - "&7• &fSelected chunk will be added to your claim"
+          - "&7• &fSelected chunk will be added to your claim \"&e{claim_name}&f\""
           - ""
           - "&aClick to green dye for confirm expansion"
           - "&cClick to red dye for cancel expansion"
@@ -688,7 +701,7 @@ guis:
         lore:
           - ""
           - "&cWarning: &fThis action will:"
-          - "&7• &fPermanently delete your claim"
+          - "&7• &fPermanently delete your claim \"&e{claim_name}&f\""
           - "&7• &fCannot be undone"
           - ""
           - "&aClick to green dye for confirm deletion"
@@ -698,7 +711,7 @@ guis:
         lore:
           - ""
           - "&fThis action will:"
-          - "&7• &fRemove &e{player} &ffrom your claim"
+          - "&7• &fRemove &e{player} &ffrom your claim \"&e{claim_name}&f\""
           - "&7• &fRevoke all their permissions"
           - ""
           - "&aClick to green dye for confirm removal"
@@ -708,7 +721,7 @@ guis:
         lore:
           - ""
           - "&fThis action will:"
-          - "&7• &fAdd &e{player} &fto your claim"
+          - "&7• &fAdd &e{player} &fto your claim \"&e{claim_name}&f\""
           - "&7• &fGrant them co-op permissions"
           - ""
           - "&aClick to green dye for confirm addition"
@@ -718,7 +731,7 @@ guis:
         lore:
           - ""
           - "&cWarning: &fThis action will:"
-          - "&7• &fTransfer ownership to &e{player}"
+          - "&7• &fTransfer ownership of \"&e{claim_name}&f\" to &e{player}"
           - "&7• &fRemove your access to this claim"
           - "&7• &fCannot be undone"
           - ""
@@ -739,7 +752,7 @@ guis:
         lore:
           - ""
           - "&fThis action will:"
-          - "&7• &fMove the claim block to your location"
+          - "&7• &fMove the claim block of \"&e{claim_name}&f\" to your location"
           - "&7• &fTeleportation point will also move alongside it"
           - ""
           - "&aClick green dye to confirm move"

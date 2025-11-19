@@ -63,6 +63,7 @@ public enum Permission {
     ADD_COOP("Add co-op to claim"),
     MANAGE_CLAIM_BLOCK_TYPES("Manage claim block types"),
     MOVE_CLAIM_BLOCK("Move the claim block"),
+    SET_CLAIM_NAME("Set claim name"),
     MANAGE_SETTINGS("Manage claim settings");
 
     private final String description;

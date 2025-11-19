@@ -67,7 +67,7 @@ public class CoopListMenu extends BaseMenu {
     }
 
     private void setupMenu() {
-        createInventory(MenuType.CHEST_6_ROWS, getString("title"));
+        createInventory(MenuType.CHEST_6_ROWS, getString("title").replace("{claim_name}", claim.getClaimName()));
 
         addNavigationButton();
         addAddMemberButton();
@@ -172,7 +172,7 @@ public class CoopListMenu extends BaseMenu {
                 NClaim.inst().getGuiLangManager().getString("confirm_menu.children.add_coop.display_name"),
                 NClaim.inst().getGuiLangManager().getStringList("confirm_menu.children.add_coop.lore")
                         .stream()
-                        .map(s -> s.replace("{player}", targetName))
+                        .map(s -> s.replace("{player}", targetName).replace("{claim_name}", claim.getClaimName()))
                         .collect(Collectors.toList()),
                 onFinish);
     }

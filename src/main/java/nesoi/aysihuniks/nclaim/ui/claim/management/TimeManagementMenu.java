@@ -53,7 +53,7 @@ public class TimeManagementMenu extends BaseMenu {
     }
 
     private void setupMenu() {
-        createInventory(MenuType.CHEST_5_ROWS, getString("title"));
+        createInventory(MenuType.CHEST_5_ROWS, getString("title").replace("{claim_name}", claim.getClaimName()));
 
         addButton(new Button() {
             @Override

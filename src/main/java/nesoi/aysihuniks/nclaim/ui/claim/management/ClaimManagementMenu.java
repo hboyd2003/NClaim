@@ -47,7 +47,8 @@ public class ClaimManagementMenu extends BaseMenu {
     }
 
     private void setupMenu() {
-        createInventory(MenuType.CHEST_3_ROWS, getString("title"));
+        createInventory(MenuType.CHEST_3_ROWS, getString("title")
+                .replace("{claim_name}", claim.getClaimName()));
 
         if (admin) {
             addButton(new Button() {
@@ -220,7 +221,7 @@ public class ClaimManagementMenu extends BaseMenu {
 
                 new ConfirmMenu(player,
                         NClaim.inst().getGuiLangManager().getString("confirm_menu.children.delete_claim.display_name"),
-                        NClaim.inst().getGuiLangManager().getStringList("confirm_menu.children.delete_claim.lore"),
+                        NClaim.inst().getGuiLangManager().getStringList("confirm_menu.children.delete_claim.lore").stream().map(line -> line.replace("{claim_name}", claim.getClaimName())).toList(),
                         (result) -> {
                             if ("confirmed".equals(result)) {
                                 claim.remove(RemoveCause.UNCLAIM);

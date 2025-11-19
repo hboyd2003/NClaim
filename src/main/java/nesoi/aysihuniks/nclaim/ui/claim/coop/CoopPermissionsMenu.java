@@ -65,7 +65,8 @@ public class CoopPermissionsMenu extends BaseMenu {
     private final Map<PermissionCategory, ItemStack> CATEGORY_ICONS = new EnumMap<>(PermissionCategory.class);
 
     private void setupMenu() {
-        createInventory(MenuType.CHEST_6_ROWS, getString("title").replace("{player}", coopPlayer != null && coopPlayer.getName() != null ? coopPlayer.getName() : "Unknown"));
+        createInventory(MenuType.CHEST_6_ROWS, getString("title").replace("{player}", coopPlayer != null && coopPlayer.getName() != null ? coopPlayer.getName() : "Unknown")
+                .replace("{claim_name}", claim.getClaimName()));
 
         loadCategoryIcons();
 
@@ -248,7 +249,7 @@ public class CoopPermissionsMenu extends BaseMenu {
                 new ConfirmMenu(player,
                         NClaim.inst().getGuiLangManager().getString("confirm_menu.children.transfer_claim.display_name"),
                         NClaim.inst().getGuiLangManager().getStringList("confirm_menu.children.transfer_claim.lore").stream()
-                                .map(s -> s.replace("{player}", coopPlayer.getName() != null ? coopPlayer.getName() : "Unknown"))
+                                .map(s -> s.replace("{player}", coopPlayer.getName() != null ? coopPlayer.getName() : "Unknown").replace("{claim_name}", claim.getClaimName()))
                                 .collect(Collectors.toList()),
                         result -> {
                             if ("confirmed".equals(result)) {
@@ -285,7 +286,7 @@ public class CoopPermissionsMenu extends BaseMenu {
                 new ConfirmMenu(player,
                         NClaim.inst().getGuiLangManager().getString("confirm_menu.children.kick_coop.display_name"),
                         NClaim.inst().getGuiLangManager().getStringList("confirm_menu.children.kick_coop.lore").stream()
-                                .map(s -> s.replace("{player}", coopPlayer != null && coopPlayer.getName() != null ? coopPlayer.getName() : "Unknown"))
+                                .map(s -> s.replace("{player}", coopPlayer != null && coopPlayer.getName() != null ? coopPlayer.getName() : "Unknown").replace("claim_name", claim.getClaimName()))
                                 .collect(Collectors.toList()),
                         result -> {
                             if ("confirmed".equals(result)) {
