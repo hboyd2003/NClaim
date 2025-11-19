@@ -380,40 +380,46 @@ public class ClaimManager implements Listener {
     }
 
     private Permission getInteractPermission(Material type) {
-        if (type == Material.SPAWNER) return Permission.PLACE_SPAWNER;
-        if (type == Material.CHEST) return Permission.USE_CHEST;
-        if (type == Material.FURNACE || type == Material.BLAST_FURNACE || type == Material.SMOKER) return Permission.USE_FURNACE;
-        if (type == Material.TRAPPED_CHEST) return Permission.USE_TRAPPED_CHEST;
-        if (type == Material.SWEET_BERRY_BUSH) return Permission.PLACE_BLOCKS;
-        if (type == Material.BARREL) return Permission.USE_BARREL;
-        if (Tag.SHULKER_BOXES.isTagged(type)) return Permission.USE_SHULKER;
-        if (type == Material.HOPPER) return Permission.USE_HOPPER;
-        if (type == Material.DISPENSER) return Permission.USE_DISPENSER;
-        if (type == Material.DROPPER) return Permission.USE_DROPPER;
-        if (type == Material.REPEATER) return Permission.USE_REPEATER;
-        if (type == Material.COMPARATOR) return Permission.USE_COMPARATOR;
+        Permission permission = switch (type) {
+            case SPAWNER -> Permission.PLACE_SPAWNER;
+            case CHEST -> Permission.USE_CHEST;
+            case TRAPPED_CHEST -> Permission.USE_TRAPPED_CHEST;
+            case BARREL -> Permission.USE_BARREL;
+            case SWEET_BERRY_BUSH -> Permission.PLACE_BLOCKS;
+            case HOPPER -> Permission.USE_HOPPER;
+            case DISPENSER -> Permission.USE_DISPENSER;
+            case DROPPER -> Permission.USE_DROPPER;
+            case REPEATER -> Permission.USE_REPEATER;
+            case COMPARATOR -> Permission.USE_COMPARATOR;
+            case LEVER -> Permission.USE_LEVERS;
+            case CRAFTING_TABLE -> Permission.USE_CRAFTING;
+            case ENCHANTING_TABLE -> Permission.USE_ENCHANTING;
+            case GRINDSTONE -> Permission.USE_GRINDSTONE;
+            case STONECUTTER -> Permission.USE_STONECUTTER;
+            case LOOM -> Permission.USE_LOOM;
+            case SMITHING_TABLE -> Permission.USE_SMITHING;
+            case CARTOGRAPHY_TABLE -> Permission.USE_CARTOGRAPHY;
+            case BREWING_STAND -> Permission.USE_BREWING;
+            case BELL -> Permission.USE_BELL;
+            case BEACON -> Permission.USE_BEACON;
+            case JUKEBOX -> Permission.USE_JUKEBOX;
+            case NOTE_BLOCK -> Permission.USE_NOTEBLOCK;
+            case CAMPFIRE -> Permission.USE_CAMPFIRE;
+            case SOUL_CAMPFIRE -> Permission.USE_SOUL_CAMPFIRE;
+            default -> null;
+        };
+
+        if (permission != null) return permission;
+
         if (Tag.BUTTONS.isTagged(type)) return Permission.USE_BUTTONS;
-        if (Tag.PRESSURE_PLATES.isTagged(type)) return Permission.USE_PRESSURE_PLATES;
-        if (type == Material.LEVER) return Permission.USE_LEVERS;
-        if (Tag.DOORS.isTagged(type)) return Permission.USE_DOORS;
-        if (Tag.TRAPDOORS.isTagged(type)) return Permission.USE_TRAPDOORS;
-        if (Tag.FENCE_GATES.isTagged(type)) return Permission.USE_GATES;
-        if (type == Material.CRAFTING_TABLE) return Permission.USE_CRAFTING;
-        if (type == Material.ENCHANTING_TABLE) return Permission.USE_ENCHANTING;
-        if (Tag.ANVIL.isTagged(type)) return Permission.USE_ANVIL;
-        if (type == Material.GRINDSTONE) return Permission.USE_GRINDSTONE;
-        if (type == Material.STONECUTTER) return Permission.USE_STONECUTTER;
-        if (type == Material.LOOM) return Permission.USE_LOOM;
-        if (type == Material.SMITHING_TABLE) return Permission.USE_SMITHING;
-        if (type == Material.CARTOGRAPHY_TABLE) return Permission.USE_CARTOGRAPHY;
-        if (type == Material.BREWING_STAND) return Permission.USE_BREWING;
-        if (type == Material.BELL) return Permission.USE_BELL;
-        if (type == Material.BEACON) return Permission.USE_BEACON;
-        if (type == Material.JUKEBOX) return Permission.USE_JUKEBOX;
-        if (type == Material.NOTE_BLOCK) return Permission.USE_NOTEBLOCK;
-        if (type == Material.CAMPFIRE) return Permission.USE_CAMPFIRE;
-        if (type == Material.SOUL_CAMPFIRE) return Permission.USE_SOUL_CAMPFIRE;
-        if (Tag.BEDS.isTagged(type)) return Permission.USE_BED;
+        else if (Tag.SHULKER_BOXES.isTagged(type)) return Permission.USE_SHULKER;
+        else if (Tag.PRESSURE_PLATES.isTagged(type)) return Permission.USE_PRESSURE_PLATES;
+        else if (Tag.DOORS.isTagged(type)) return Permission.USE_DOORS;
+        else if (Tag.TRAPDOORS.isTagged(type)) return Permission.USE_TRAPDOORS;
+        else if (Tag.FENCE_GATES.isTagged(type)) return Permission.USE_GATES;
+        else if (Tag.ANVIL.isTagged(type)) return Permission.USE_ANVIL;
+        else if (Tag.BEDS.isTagged(type)) return Permission.USE_BED;
+
         return null;
     }
 
@@ -516,14 +522,13 @@ public class ClaimManager implements Listener {
         Block block = event.getBlock();
         Claim sourceClaim = Claim.getClaim(block.getChunk());
         for (BlockFace face : BlockFace.values()) {
-            Block relative = block.getRelative(face);
-            Claim targetClaim = Claim.getClaim(relative.getChunk());
-            if (targetClaim != null && sourceClaim != null) {
-                if (!targetClaim.getOwner().equals(sourceClaim.getOwner()) &&
-                        !targetClaim.getCoopPlayers().contains(sourceClaim.getOwner())) {
-                    event.setNewCurrent(event.getOldCurrent());
-                    return;
-                }
+            Claim targetClaim = Claim.getClaim(block.getRelative(face).getChunk());
+            if (targetClaim != null
+                    && sourceClaim != null
+                    && !targetClaim.getOwner().equals(sourceClaim.getOwner())
+                    && !targetClaim.getCoopPlayers().contains(sourceClaim.getOwner())) {
+                event.setNewCurrent(event.getNewCurrent());
+                return;
             }
         }
     }
