@@ -197,7 +197,7 @@ public class ClaimListMenu extends BaseMenu {
         List<String> lore = new ArrayList<>(getStringList(buttonPath + ".lore"));
         lore.replaceAll(s -> s.replace("{world}", chunk.getWorld().getName())
                 .replace("{coordinates}", NClaim.getCoordinates(chunk))
-                .replace("{owner}", Bukkit.getOfflinePlayer(claim.getOwner()).getName()));
+                .replace("{owner}", Optional.ofNullable(Bukkit.getOfflinePlayer(claim.getOwner()).getName()).orElse("Unknown")));
 
         ItemStack item = ItemCreator.of(isOwner ? getMaterial("own_claims") : getMaterial("coop_claims"))
                 .name(getString(buttonPath + ".display_name")
