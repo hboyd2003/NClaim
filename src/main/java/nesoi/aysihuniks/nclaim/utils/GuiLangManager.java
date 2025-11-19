@@ -69,6 +69,7 @@ public class GuiLangManager {
             case "monster_spawning" -> Setting.MONSTER_SPAWNING;
             case "animal_spawning" -> Setting.ANIMAL_SPAWNING;
             case "villager_interactions" -> Setting.VILLAGER_INTERACTION;
+            case "show_hologram" -> Setting.SHOW_HOLOGRAM;
             default -> null;
         };
     }

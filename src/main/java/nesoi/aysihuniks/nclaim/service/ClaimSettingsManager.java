@@ -42,7 +42,7 @@ public class ClaimSettingsManager {
         }
 
         claim.getSettings().set(setting, newState);
-
+        claim.onSettingsChanged();
         plugin.getDatabaseManager().saveClaim(claim);
 
     }

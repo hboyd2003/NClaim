@@ -14,6 +14,7 @@ public class ClaimSetting {
         put(Setting.MONSTER_SPAWNING, true);
         put(Setting.ANIMAL_SPAWNING, true);
         put(Setting.VILLAGER_INTERACTION, false);
+        put(Setting.SHOW_HOLOGRAM, true);
     }};
 
     public boolean isEnabled(Setting setting) {

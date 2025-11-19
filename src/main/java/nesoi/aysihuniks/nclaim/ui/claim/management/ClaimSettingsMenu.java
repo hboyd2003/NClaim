@@ -41,7 +41,8 @@ public class ClaimSettingsMenu extends BaseMenu {
             new SettingData(Setting.MOB_ATTACKING, "mob_attacks", getMaterial("settings.mob_attacks")),
             new SettingData(Setting.MONSTER_SPAWNING, "monster_spawning", getMaterial("settings.monster_spawning")),
             new SettingData(Setting.ANIMAL_SPAWNING, "animal_spawning", getMaterial("settings.animal_spawning")),
-            new SettingData(Setting.VILLAGER_INTERACTION, "villager_interactions", getMaterial("settings.villager_interactions"))
+            new SettingData(Setting.VILLAGER_INTERACTION, "villager_interactions", getMaterial("settings.villager_interactions")),
+            new SettingData(Setting.SHOW_HOLOGRAM, "show_hologram", getMaterial("settings.show_hologram"))
     );
 
     public ClaimSettingsMenu(Player player, Claim claim, int page, boolean admin) {

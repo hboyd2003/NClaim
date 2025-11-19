@@ -10,6 +10,7 @@ import nesoi.aysihuniks.nclaim.NClaim;
 import nesoi.aysihuniks.nclaim.api.events.ClaimRemoveEvent;
 import nesoi.aysihuniks.nclaim.enums.HoloEnum;
 import nesoi.aysihuniks.nclaim.enums.RemoveCause;
+import nesoi.aysihuniks.nclaim.enums.Setting;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
@@ -159,19 +160,7 @@ public class Claim {
 
         claimBlock.getBlock().setType(Material.AIR);
 
-        String hologramId = "claim_" + world.getName() + "_" + getChunk().getX() + "_" + getChunk().getZ();
-
-        if (NClaim.inst().getHologramManager() != null) {
-            if (HoloEnum.getActiveHologram() == HoloEnum.DECENT_HOLOGRAM) {
-                Hologram hologram = DHAPI.getHologram(hologramId);
-                if (hologram != null) {
-                    hologram.delete();
-                }
-            } else {
-                HologramManager manager = FancyHologramsPlugin.get().getHologramManager();
-                manager.getHologram(hologramId).ifPresent(manager::removeHologram);
-            }
-        }
+        removeHologram();
 
         int centerX = getChunk().getX() * 16 + 8;
         int centerZ = getChunk().getZ() * 16 + 8;
@@ -359,7 +348,10 @@ public class Claim {
     public void setClaimName(@NotNull String name) {
         if (name.isEmpty()) throw new IllegalArgumentException("Name cannot be empty");
         this.claimName = name;
+        reloadHologram();
     }
+
+
 
     @ApiStatus.Internal
     public void moveClaimBlock(@NotNull Location newLocation) {
@@ -372,7 +364,9 @@ public class Claim {
         block.setBlockData(oldBlockData, false);
 
         if (plugin.getHologramManager() != null) {
-            plugin.getHologramManager().createHologram(claimBlockLocation);
+            removeHologram();
+            if (getSettings().isEnabled(Setting.SHOW_HOLOGRAM))
+                plugin.getHologramManager().createHologram(claimBlockLocation);
         }
     }
 
@@ -388,5 +382,33 @@ public class Claim {
     // Returns chunk coords not region
     public String getRegionID() {
         return this.chunk.getWorld().getName() + "_" + this.chunk.getX() + "_" + this.chunk.getZ();
+    }
+
+    public void removeHologram() {
+        String hologramId = "claim_" + getChunk().getWorld().getName() + "_" + getChunk().getX() + "_" + getChunk().getZ();
+
+        if (NClaim.inst().getHologramManager() != null) {
+            if (HoloEnum.getActiveHologram() == HoloEnum.DECENT_HOLOGRAM) {
+                Hologram hologram = DHAPI.getHologram(hologramId);
+                if (hologram != null) {
+                    hologram.delete();
+                }
+            } else {
+                HologramManager manager = FancyHologramsPlugin.get().getHologramManager();
+                manager.getHologram(hologramId).ifPresent(manager::removeHologram);
+            }
+        }
+    }
+
+    public void reloadHologram() {
+        if (plugin.getHologramManager() != null) {
+            removeHologram();
+            if (getSettings().isEnabled(Setting.SHOW_HOLOGRAM))
+                plugin.getHologramManager().createHologram(claimBlockLocation);
+        }
+    }
+
+    public void onSettingsChanged() {
+        reloadHologram();
     }
 }

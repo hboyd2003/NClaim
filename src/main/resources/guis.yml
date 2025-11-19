@@ -586,6 +586,19 @@ guis:
           - "&7Status: {status}"
           - ""
           - "&eClick to toggle"
+      show_hologram:
+        default_value: true
+        changeable: true
+        # permission: "nclaim.change_claim_villager_interaction_setting"
+        display_name: "&6Claim Block Hologram"
+        material: "BLUE_STAINED_GLASS"
+        lore:
+          - ""
+          - "&fShow hologram above claim block"
+          - ""
+          - "&7Status: {status}"
+          - ""
+          - "&eClick to toggle"
 
   claim_block_management_menu:
     title: "Claim Block Management - {claim_name}"
