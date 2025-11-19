@@ -17,6 +17,7 @@ fancyholograms = "2.8.0"
 item-nbt-api = "2.15.3"
 placeholderapi = "2.11.7"
 skinsrestorer-api = "15.8.2"
+bstats = "3.0.2"
 
 [libraries]
 spigotApi = { module = "org.spigotmc:spigot-api", version.ref = "spigot-api" }
@@ -34,5 +35,6 @@ fancyholograms = { module = "de.oliver:FancyHolograms", version.ref = "fancyholo
 itemNbtApi = { module = "de.tr7zw:item-nbt-api", version.ref = "item-nbt-api" }
 placeholderapi = { module = "me.clip:placeholderapi", version.ref = "placeholderapi" }
 skinsrestorerApi = { module = "net.skinsrestorer:skinsrestorer-api", version.ref = "skinsrestorer-api" }
+bstats = {module = "org.bstats:bstats-bukkit", version.ref = "bstats"}
 
 

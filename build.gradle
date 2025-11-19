@@ -84,15 +84,15 @@ dependencies {
     compileOnly(libs.worldguard)
     compileOnly(libs.skinsrestorerApi)
     compileOnly(libs.axsellwands)
+    compileOnly(libs.placeholderapi)
+    compileOnly(libs.vaultapi)
+    compileOnly(libs.bstats)
 
     implementation(libs.dapi)
     implementation(libs.anvilmenu)
     implementation(libs.itemNbtApi)
     implementation(libs.hikaricp)
     implementation(libs.farmerV6)
-    compileOnly(libs.placeholderapi)
-    implementation(libs.vaultapi)
-
 }
 
 configurations.configureEach {
@@ -150,6 +150,7 @@ shadowJar {
     archiveClassifier = ""
     relocate("org.nandayo.dapi", "nesoi.aysihuniks.libs.dapi")
     relocate("de.tr7zw.changeme.nbtapi", "nesoi.aysihuniks.libs.nbtapi")
+    relocate("org.bstats", "nesoi.aysihuniks.libs.bstats")
 }
 
 tasks.withType(JavaCompile).configureEach {
