@@ -11,6 +11,7 @@ import nesoi.aysihuniks.nclaim.NClaim;
 import nesoi.aysihuniks.nclaim.api.events.ClaimEnterEvent;
 import nesoi.aysihuniks.nclaim.api.events.ClaimLeaveEvent;
 import nesoi.aysihuniks.nclaim.enums.Setting;
+import nesoi.aysihuniks.nclaim.integrations.EnhancedPets;
 import nesoi.aysihuniks.nclaim.ui.claim.management.ClaimManagementMenu;
 import nesoi.aysihuniks.nclaim.model.Claim;
 import nesoi.aysihuniks.nclaim.enums.Permission;
@@ -429,6 +430,13 @@ public class ClaimManager implements Listener {
         if (event.isCancelled()) return;
         Player player = event.getPlayer();
         Entity entity = event.getRightClicked();
+
+        // All registered pets to bypass interaction permissions
+        EnhancedPets enhancedPets = NClaim.inst().getEnhancedPets();
+        if (enhancedPets != null && enhancedPets.isPetOwnedBy(entity.getUniqueId(), player.getUniqueId())) {
+            return;
+        }
+
         Claim claim = Claim.getClaim(entity.getLocation().getChunk());
         if (cancelIfNotClaimMember(player, claim, event)) return;
         Permission permission = switch (entity) {

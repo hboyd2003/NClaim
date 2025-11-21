@@ -31,7 +31,6 @@ import org.nandayo.dapi.DAPI;
 import org.nandayo.dapi.object.DEntityType;
 import org.nandayo.dapi.object.DMaterial;
 import org.nandayo.dapi.object.DParticle;
-import org.nandayo.dapi.object.DSound;
 import org.nandayo.dapi.util.HexUtil;
 import org.nandayo.dapi.util.Util;
 
@@ -56,6 +55,7 @@ public final class NClaim extends JavaPlugin {
     private ClaimLevelManager blockValueManager;
     private MySQLManager mySQLManager;
     private SQLiteManager sqLiteManager;
+    private EnhancedPets enhancedPets;
     private @NotNull DatabaseManager databaseManager;
     @Getter
     private static Economy econ = null;
@@ -98,7 +98,7 @@ public final class NClaim extends JavaPlugin {
 
         if (!NBT.preloadApi()) {
             Util.log("&cNBT-API wasn't initialized properly, disabling the plugin");
-            getPluginLoader().disablePlugin(this);
+            this.getServer().getPluginManager().disablePlugin(this);
             return;
         }
 
@@ -280,6 +280,7 @@ public final class NClaim extends JavaPlugin {
         setupVault();
         setupAxsellwand();
         setupSmartSpawner();
+        setupEnhancedPets();
     }
 
     private void setupAxsellwand() {
@@ -300,6 +301,15 @@ public final class NClaim extends JavaPlugin {
         if (!HoloEnum.isHologramPluginEnabled()) {
             Util.log("&cYou need to have one of the &rDecentHolograms &cor &rFancyHolograms &cplugins installed!");
             getServer().getPluginManager().disablePlugin(this);
+        }
+    }
+
+    private void setupEnhancedPets() {
+        if (getServer().getPluginManager().getPlugin("EnhancedPets") != null) {
+            enhancedPets = new EnhancedPets();
+            Util.log("&aEnhancedPets enabled successfully!");
+        } else {
+            enhancedPets = null;
         }
     }
 
@@ -483,11 +493,6 @@ public final class NClaim extends JavaPlugin {
         return sb.toString().trim();
     }
 
-    public static boolean isChunkAdjacent(@NotNull Chunk chunk, @NotNull Chunk thatChunk, int radius) {
-        return Math.abs(chunk.getX() - thatChunk.getX()) <= radius &&
-                Math.abs(chunk.getZ() - thatChunk.getZ()) <= radius;
-    }
-
     public static Material getMaterial(DMaterial dMaterial, DMaterial def) {
         Material mat = dMaterial.parseMaterial();
         return mat != null ? mat : (def != null ? def.parseMaterial() : Material.AIR);
@@ -496,11 +501,6 @@ public final class NClaim extends JavaPlugin {
     public static Particle getParticle(@NotNull DParticle dParticle, @NotNull DParticle def) {
         Particle particle = dParticle.get();
         return particle != null ? particle : def.get();
-    }
-
-    public static Sound getSound(@NotNull DSound dSound, @NotNull DSound def) {
-        Sound sound = dSound.parseSound();
-        return sound != null ? sound : def.parseSound();
     }
 
     public static EntityType getEntityType(@NotNull DEntityType dEntityType, DEntityType def) {
