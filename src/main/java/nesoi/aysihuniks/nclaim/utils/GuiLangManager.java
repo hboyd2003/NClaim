@@ -74,7 +74,7 @@ public class GuiLangManager {
         File file = new File(this.plugin.getDataFolder(), "guis.yml");
 
         try {
-            defConfig.set("config_version", version);
+            defConfig.set("gui_version", version);
             defConfig.save(file);
             guiConfig = defConfig;
             Util.log("&aUpdated config file.");
