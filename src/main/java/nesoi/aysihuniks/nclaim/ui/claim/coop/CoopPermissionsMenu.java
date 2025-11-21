@@ -1,5 +1,6 @@
 package nesoi.aysihuniks.nclaim.ui.claim.coop;
 
+import com.destroystokyo.paper.profile.PlayerProfile;
 import com.google.common.collect.Sets;
 import nesoi.aysihuniks.nclaim.NClaim;
 import nesoi.aysihuniks.nclaim.ui.shared.BackgroundMenu;
@@ -8,6 +9,7 @@ import nesoi.aysihuniks.nclaim.ui.shared.ConfirmMenu;
 import nesoi.aysihuniks.nclaim.model.Claim;
 import nesoi.aysihuniks.nclaim.enums.Permission;
 import nesoi.aysihuniks.nclaim.enums.PermissionCategory;
+import nesoi.aysihuniks.nclaim.utils.HeadUtil;
 import nesoi.aysihuniks.nclaim.utils.MessageType;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -123,7 +125,10 @@ public class CoopPermissionsMenu extends BaseMenu {
                 lore.replaceAll(s -> s.replace("{date}",
                         NClaim.serializeDate(claim.getCoopPlayerJoinDate().get(coopPlayer.getUniqueId()))));
 
-                return ItemCreator.of(NClaim.inst().getHeadManager().createHeadFromCache(coopPlayer.getUniqueId()))
+                PlayerProfile coopPlayerProfile = coopPlayer.getPlayerProfile();
+                coopPlayerProfile.update();
+
+                return ItemCreator.of(HeadUtil.createHead(coopPlayerProfile))
                         .name(getString("player_info.display_name").replace("{player}", playerName))
                         .lore(lore)
                         .get();

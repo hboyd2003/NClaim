@@ -12,6 +12,7 @@ import nesoi.aysihuniks.nclaim.ui.shared.BackgroundMenu;
 import nesoi.aysihuniks.nclaim.model.Claim;
 import nesoi.aysihuniks.nclaim.model.ClaimSetting;
 import nesoi.aysihuniks.nclaim.ui.shared.ConfirmMenu;
+import nesoi.aysihuniks.nclaim.utils.HeadUtil;
 import nesoi.aysihuniks.nclaim.utils.MessageType;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
@@ -288,7 +289,7 @@ public class AdminAllClaimMenu extends BaseMenu {
                 if (NClaim.inst().getGuiLangManager().getGuiConfig().contains(materialPath)) {
                     baseItem = NClaim.inst().getGuiLangManager().getMaterial(section);
                 } else {
-                    baseItem = NClaim.inst().getHeadManager().createHeadFromCache(owner.getUniqueId());
+                    baseItem = HeadUtil.createHead(owner.getPlayerProfile());
                 }
 
                 return ItemCreator.of(baseItem)

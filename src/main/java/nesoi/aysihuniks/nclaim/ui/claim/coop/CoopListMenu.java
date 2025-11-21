@@ -1,5 +1,6 @@
 package nesoi.aysihuniks.nclaim.ui.claim.coop;
 
+import com.destroystokyo.paper.profile.PlayerProfile;
 import com.google.common.collect.Sets;
 import nesoi.aysihuniks.nclaim.NClaim;
 import nesoi.aysihuniks.nclaim.enums.Permission;
@@ -10,6 +11,7 @@ import nesoi.aysihuniks.nclaim.ui.shared.BaseMenu;
 import nesoi.aysihuniks.nclaim.ui.shared.ConfirmMenu;
 import nesoi.aysihuniks.nclaim.model.Claim;
 import nesoi.aysihuniks.nclaim.model.CoopPermission;
+import nesoi.aysihuniks.nclaim.utils.HeadUtil;
 import nesoi.aysihuniks.nclaim.utils.MessageType;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -49,7 +51,10 @@ public class CoopListMenu extends BaseMenu {
         int startIndex = page * coopSlots.length;
         int endIndex = Math.min(startIndex + coopSlots.length, coopPlayers.size());
         Collection<UUID> uuidsToLoad = coopPlayers.subList(startIndex, endIndex);
-        NClaim.inst().getHeadManager().preloadTexturesAsync(uuidsToLoad);
+        uuidsToLoad.stream()
+                .map(Bukkit::getOfflinePlayer)
+                .map(OfflinePlayer::getPlayerProfile)
+                .forEach(PlayerProfile::update);
 
         Bukkit.getScheduler().runTaskAsynchronously(NClaim.inst(), () -> {
             setupMenu();
@@ -274,7 +279,7 @@ public class CoopListMenu extends BaseMenu {
 
             @Override
             public ItemStack getItem() {
-                return ItemCreator.of(NClaim.inst().getHeadManager().createHeadFromCache(coopPlayer.getUniqueId()))
+                return ItemCreator.of(HeadUtil.createHead(coopPlayer.getPlayerProfile()))
                         .name(getString(buttonPath + ".display_name")
                                 .replace("{player}", coopPlayer.isOnline() ? "&a" + playerName : "&7" + playerName + " " + getString("offline")))
                         .lore(lore)

@@ -44,7 +44,6 @@ import java.util.*;
 public final class NClaim extends JavaPlugin {
     private static NClaim instance;
 
-    private Wrapper wrapper;
     private ClaimService claimService;
     private ClaimStorageManager claimStorageManager;
     private ClaimExpirationManager claimExpirationManager;
@@ -55,7 +54,6 @@ public final class NClaim extends JavaPlugin {
     private ClaimVisualizerService claimVisualizerService;
     private ClaimSettingsManager claimSettingsManager;
     private ClaimLevelManager blockValueManager;
-    private HeadManager headManager;
     private MySQLManager mySQLManager;
     private SQLiteManager sqLiteManager;
     private @NotNull DatabaseManager databaseManager;
@@ -105,8 +103,6 @@ public final class NClaim extends JavaPlugin {
         }
 
         initializeHologramManager();
-
-        setupHeadManager();
 
         startTasks();
 
@@ -232,7 +228,6 @@ public final class NClaim extends JavaPlugin {
     }
 
     private void initializeManagers() {
-        wrapper = new Wrapper(this);
         if (NClaim.inst().getServer().getPluginManager().getPlugin("Farmer") != null) {
             GeikFarmer.registerIntegration();
         }
@@ -305,15 +300,6 @@ public final class NClaim extends JavaPlugin {
         if (!HoloEnum.isHologramPluginEnabled()) {
             Util.log("&cYou need to have one of the &rDecentHolograms &cor &rFancyHolograms &cplugins installed!");
             getServer().getPluginManager().disablePlugin(this);
-        }
-    }
-
-    private void setupHeadManager() {
-        try {
-            headManager = new HeadManager();
-            Util.log("&aHeadManager initialized successfully!");
-        } catch (Exception e) {
-            Util.log("&cFailed to initialize HeadManager: " + e.getMessage());
         }
     }
 

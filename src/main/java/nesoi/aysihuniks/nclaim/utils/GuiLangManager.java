@@ -137,7 +137,7 @@ public class GuiLangManager {
         ItemStack item;
         if (matName.toUpperCase().startsWith("HEAD")) {
             String texture = matName.length() > 4 ? matName.substring(5) : "";
-            item = headManager.createHeadWithTexture(texture);
+            item = HeadUtil.createHead(texture);
         } else {
             try {
                 Material material = Material.valueOf(matName.toUpperCase());
