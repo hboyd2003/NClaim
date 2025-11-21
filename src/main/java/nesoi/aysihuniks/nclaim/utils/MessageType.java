@@ -46,6 +46,18 @@ public abstract class MessageType {
         }
     };
 
+    public static final MessageType WRONG = new MessageType() {
+        @Override
+        public void playSound(Player player) {
+            player.playSound(Sound.sound()
+                    .type(Key.key("entity.villager.no"))
+                    .source(Sound.Source.NEUTRAL)
+                    .seed(1L)
+                    .volume(0.75f)
+                    .build());
+        }
+    };
+
     public static final MessageType WARN = new MessageType() {
         @Override
         public void playSound(Player player) {

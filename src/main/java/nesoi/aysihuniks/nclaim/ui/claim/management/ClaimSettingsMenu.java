@@ -56,8 +56,8 @@ public class ClaimSettingsMenu extends BaseMenu {
     }
 
     @Override
-    public Function<Integer, @Nullable SingleSlotButton> backgroundButtonFunction() {
-        return BackgroundMenu::getButton;
+    public Function<Integer, SingleSlotButton> backgroundButtonFunction() {
+        return BackgroundMenu::getAlternatingRowButton;
     }
 
     private void setupMenu() {

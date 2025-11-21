@@ -55,7 +55,7 @@ public class AdminAllClaimMenu extends BaseMenu {
 
     @Override
     public Function<Integer, SingleSlotButton> backgroundButtonFunction() {
-        return BackgroundMenu::getButton;
+        return BackgroundMenu::getAlternatingRowButton;
     }
 
     private void setupMenu() {

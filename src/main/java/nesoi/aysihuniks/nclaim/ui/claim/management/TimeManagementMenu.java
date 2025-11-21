@@ -13,7 +13,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.nandayo.dapi.util.ItemCreator;
 import org.nandayo.dapi.guimanager.button.Button;
 import org.nandayo.dapi.guimanager.MenuType;
@@ -48,8 +47,8 @@ public class TimeManagementMenu extends BaseMenu {
     }
 
     @Override
-    public Function<Integer, @Nullable SingleSlotButton> backgroundButtonFunction() {
-        return BackgroundMenu::getButton;
+    public Function<Integer, SingleSlotButton> backgroundButtonFunction() {
+        return BackgroundMenu::getAlternatingRowButton;
     }
 
     private void setupMenu() {

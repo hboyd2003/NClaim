@@ -10,7 +10,6 @@ import nesoi.aysihuniks.nclaim.ui.shared.ConfirmMenu;
 import nesoi.aysihuniks.nclaim.utils.MessageType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.nandayo.dapi.message.ChannelType;
 import org.nandayo.dapi.util.ItemCreator;
 import org.bukkit.event.inventory.ClickType;
@@ -45,8 +44,8 @@ public class ClaimMainMenu extends BaseMenu {
     }
 
     @Override
-    public Function<Integer, @Nullable SingleSlotButton> backgroundButtonFunction() {
-        return BackgroundMenu::getButton;
+    public Function<Integer, SingleSlotButton> backgroundButtonFunction() {
+        return BackgroundMenu::getAlternatingRowButton;
     }
 
     private void addBuyClaimButton() {

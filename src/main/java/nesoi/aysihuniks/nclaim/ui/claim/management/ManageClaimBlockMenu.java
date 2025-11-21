@@ -1,7 +1,6 @@
 package nesoi.aysihuniks.nclaim.ui.claim.management;
 
 import com.google.common.collect.Sets;
-import me.clip.placeholderapi.PlaceholderAPI;
 import nesoi.aysihuniks.nclaim.NClaim;
 import nesoi.aysihuniks.nclaim.enums.Balance;
 import nesoi.aysihuniks.nclaim.enums.Permission;
@@ -66,8 +65,8 @@ public class ManageClaimBlockMenu extends BaseMenu {
     }
 
     @Override
-    public Function<Integer, @Nullable SingleSlotButton> backgroundButtonFunction() {
-        return BackgroundMenu::getButton;
+    public Function<Integer, SingleSlotButton> backgroundButtonFunction() {
+        return BackgroundMenu::getAlternatingRowButton;
     }
 
     private void setup() {

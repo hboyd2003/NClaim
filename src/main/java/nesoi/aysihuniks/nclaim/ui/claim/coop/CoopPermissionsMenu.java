@@ -60,8 +60,8 @@ public class CoopPermissionsMenu extends BaseMenu {
     }
 
     @Override
-    public Function<Integer, @Nullable SingleSlotButton> backgroundButtonFunction() {
-        return BackgroundMenu::getButton;
+    public Function<Integer, SingleSlotButton> backgroundButtonFunction() {
+        return BackgroundMenu::getAlternatingRowButton;
     }
 
     private final Map<PermissionCategory, ItemStack> CATEGORY_ICONS = new EnumMap<>(PermissionCategory.class);
