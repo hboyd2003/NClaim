@@ -365,19 +365,7 @@ public class ClaimManager implements Listener {
         if (hasClaimBypass(player, "interact")) return;
         if (cancelIfNotClaimMember(player, claim, event)) return;
         Permission permission = getInteractPermission(block.getType());
-        if (permission == null) {
-            if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-                Material handType = player.getInventory().getItemInMainHand().getType();
-                if (handType == Material.ITEM_FRAME || handType == Material.GLOW_ITEM_FRAME) {
-                    permission = Permission.INTERACT_ITEM_FRAME;
-                } else if (handType == Material.PAINTING) {
-                    permission = Permission.PLACE_BLOCKS;
-                } else if (handType == Material.ARMOR_STAND) {
-                    permission = Permission.INTERACT_ARMOR_STAND;
-                }
-            }
-            if (permission == null) return;
-        }
+        if (permission == null) return;
         cancelIfNoPermission(player, claim, permission, event, "interact");
     }
 
@@ -408,6 +396,8 @@ public class ClaimManager implements Listener {
             case NOTE_BLOCK -> Permission.USE_NOTEBLOCK;
             case CAMPFIRE -> Permission.USE_CAMPFIRE;
             case SOUL_CAMPFIRE -> Permission.USE_SOUL_CAMPFIRE;
+            case ITEM_FRAME, GLOW_ITEM_FRAME -> Permission.INTERACT_ITEM_FRAME;
+            case ARMOR_STAND -> Permission.INTERACT_ARMOR_STAND;
             default -> null;
         };
 
