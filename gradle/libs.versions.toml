@@ -2,7 +2,7 @@
 # https://docs.gradle.org/current/userguide/platforms.html#sub::toml-dependencies-format
 
 [versions]
-spigot-api = "1.21.8-R0.1-SNAPSHOT"
+paper-api = "1.21.8-R0.1-SNAPSHOT"
 lombok = "1.18.38"
 axsellwands = "1.11.0"
 decentholograms = "2.9.7"
@@ -20,7 +20,7 @@ skinsrestorer-api = "15.8.2"
 bstats = "3.0.2"
 
 [libraries]
-spigotApi = { module = "org.spigotmc:spigot-api", version.ref = "spigot-api" }
+paperApi = { module = "io.papermc.paper:paper-api", version.ref = "paper-api" }
 lombok = { module = "org.projectlombok:lombok", version.ref = "lombok" }
 axsellwands = { module = "com.artillexstudios:AxSellwands", version.ref = "axsellwands" }
 decentholograms = { module = "com.github.decentsoftware-eu:decentholograms", version.ref = "decentholograms" }

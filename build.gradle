@@ -11,10 +11,6 @@ description = 'NClaim'
 
 repositories {
     mavenCentral()
-    maven {
-        name = "spigotmc-repo"
-        url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots/"
-    }
 
     maven {
         url = "https://oss.sonatype.org/content/groups/public/"
@@ -70,11 +66,22 @@ repositories {
         name = "okaeriReleases"
         url = "https://storehouse.okaeri.eu/repository/maven-public/"
     }
+
+    maven {
+        name = "papermc-repo"
+        url = "https://repo.papermc.io/repository/maven-public/"
+    }
+
+
+    maven {
+        name = "codemc-creatorfromhell"
+        url = "https://repo.codemc.io/repository/creatorfromhell/"
+    }
 }
 
 dependencies {
     compileOnly("com.google.guava:guava:33.3.1-jre")
-    compileOnly(libs.spigotApi)
+    compileOnly(libs.paperApi)
     compileOnly(libs.lombok)
     annotationProcessor(libs.lombok)
 
