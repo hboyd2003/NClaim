@@ -23,7 +23,7 @@ public class UserManager implements Listener {
             if (NClaim.inst().getConfigManager().getBoolean("check_for_updates", true)) {
                 UpdateChecker checker = new UpdateChecker(NClaim.inst(), 122527);
                 checker.getVersion(latestVersion -> {
-                    String currentVersion = NClaim.inst().getDescription().getVersion();
+                    String currentVersion = NClaim.inst().getDescription().getVersion().split("-")[0]; // Ignore "special" version part
                     if (!currentVersion.equalsIgnoreCase(latestVersion)) {
                         ChannelType.CHAT.sendWithPrefix(event.getPlayer(), "&aA new version is available: &ev" + latestVersion + " &8(&7You are using: &ev" + currentVersion + "&8)");
                         MessageType.CONFIRM.playSound(event.getPlayer());
