@@ -23,10 +23,10 @@ guis:
 
   scroll_button:
     directions:
-      LEFT: "Left"
-      RIGHT: "Right"
-      DOWN: "Down"
-      UP: "Up"
+      NORTH: "North"
+      SOUTH: "South"
+      EAST: "East"
+      WEST: "West"
 
   # Claim Menu - When /nclaim is typed, it is the menu with operations such as buy claim
   claim_menu:
@@ -158,6 +158,13 @@ guis:
       display_name: "&fScroll {direction}"
     center:
       display_name: "&6Center Chunk"
+      material: "BEACON"
+      lore:
+        - ""
+        - "&fThis is your claim's center chunk"
+    center_at_chunk:
+      display_name: "&6Center Chunk &7- &eYou are here"
+      material: BEACON
       lore:
         - ""
         - "&fThis is your claim's center chunk"
@@ -170,9 +177,24 @@ guis:
         - "&7Cost: &e${price}"
         - ""
         - "&eClick to purchase"
+    expand_at_chunk:
+      display_name: "&6Expand Claim &7- &eYou are here"
+      material: "PLAYER_HEAD"
+      lore:
+        - ""
+        - "&fExpand your claim"
+        - "&7Cost: &e${price}"
+        - ""
+        - "&eClick to purchase"
     claimed:
       display_name: "&aClaimed Chunk"
       material: "GREEN_WOOL"
+      lore:
+        - ""
+        - "&fThis chunk is claimed"
+    claimed_at_chunk:
+      display_name: "&aClaimed Chunk &7- &eYou are here"
+      material: "PLAYER_HEAD"
       lore:
         - ""
         - "&fThis chunk is claimed"
@@ -182,9 +204,20 @@ guis:
       lore:
         - ""
         - "&fYou can only claim adjacent chunks"
+    not_adjacent_at_chunk:
+      display_name: "&cInvalid Chunk &7- &eYou are here"
+      material: "PLAYER_HEAD"
+      lore:
+        - "&fYou can only claim adjacent chunks"
     claimed_another_player:
       display_name: "&cClaimed by Another Player"
       material: "RED_WOOL"
+      lore:
+        - ""
+        - "&fThis chunk belongs to someone else"
+    claimed_another_player_at_chunk:
+      display_name: "&cClaimed by Another Player &7- &eYou are here"
+      material: "PLAYER_HEAD"
       lore:
         - ""
         - "&fThis chunk belongs to someone else"

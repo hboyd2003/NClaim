@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.Setter;
 import nesoi.aysihuniks.nclaim.NClaim;
 import nesoi.aysihuniks.nclaim.api.events.ClaimRemoveEvent;
+import nesoi.aysihuniks.nclaim.enums.Direction;
 import nesoi.aysihuniks.nclaim.enums.HoloEnum;
 import nesoi.aysihuniks.nclaim.enums.RemoveCause;
 import nesoi.aysihuniks.nclaim.enums.Setting;
@@ -25,6 +26,7 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.function.BiPredicate;
 
 @Getter
 @Setter
@@ -371,8 +373,8 @@ public class Claim {
     }
 
     public boolean isSafeToTeleport() {
-        return claimBlockLocation.clone().add(0,1,0).getBlock().getType().isAir() &&
-                claimBlockLocation.clone().add(0,2,0).getBlock().getType().isAir();
+        return !claimBlockLocation.clone().add(0,1,0).getBlock().getType().isOccluding() &&
+                !claimBlockLocation.clone().add(0,2,0).getBlock().getType().isOccluding();
     }
 
     public void teleport(Player teleporter) {
@@ -410,5 +412,49 @@ public class Claim {
 
     public void onSettingsChanged() {
         reloadHologram();
+    }
+
+    public Chunk getFarthestChunk(Direction direction) {
+        Collection<Chunk> chunks = getAllChunks();
+
+        // Coords increase South (Z) and East (X)
+        BiPredicate<Chunk, Chunk> chunkBiPredicate = (farthestChunk, chunk) -> switch (direction) {
+            case SOUTH -> farthestChunk.getZ() < chunk.getZ();
+            case NORTH -> farthestChunk.getZ() > chunk.getZ();
+            case EAST -> farthestChunk.getX() < chunk.getX();
+            case WEST -> farthestChunk.getX() > chunk.getX();
+        };
+
+        Chunk farthestChunk = chunks.iterator().next();
+        for (Chunk chunk : chunks) {
+            if (chunkBiPredicate.test(farthestChunk, chunk)) farthestChunk = chunk;
+        }
+
+        return farthestChunk;
+    }
+
+    public boolean isChunkAdjacent(Chunk targetChunk) {
+        Coordinate2D claimCoords = Coordinate2D.ofChunk(chunk);
+        Coordinate2D targetCoords = Coordinate2D.ofChunk(targetChunk);
+
+        if (isAdjacent(claimCoords, targetCoords)) {
+            return true;
+        }
+
+        for (String landKey : lands) {
+            String[] coords = landKey.split(",");
+            if (coords.length >= 3) {
+                Coordinate2D landCoords = new Coordinate2D(Integer.parseInt(coords[1]), Integer.parseInt(coords[2]));
+
+                if (isAdjacent(landCoords, targetCoords)) return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean isAdjacent(Coordinate2D coords1, Coordinate2D coords2) {
+        return (Math.abs(coords1.x() - coords2.x()) == 1 && coords1.z() == coords2.z())
+                || (coords1.x() == coords2.x() && Math.abs(coords1.z() - coords2.z()) == 1);
     }
 }

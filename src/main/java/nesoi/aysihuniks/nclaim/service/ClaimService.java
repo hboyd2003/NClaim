@@ -10,10 +10,7 @@ import nesoi.aysihuniks.nclaim.NClaim;
 import nesoi.aysihuniks.nclaim.api.events.ClaimBuyLandEvent;
 import nesoi.aysihuniks.nclaim.api.events.ClaimCreateEvent;
 import nesoi.aysihuniks.nclaim.enums.Setting;
-import nesoi.aysihuniks.nclaim.model.Claim;
-import nesoi.aysihuniks.nclaim.model.ClaimSetting;
-import nesoi.aysihuniks.nclaim.model.SettingCfg;
-import nesoi.aysihuniks.nclaim.model.User;
+import nesoi.aysihuniks.nclaim.model.*;
 import nesoi.aysihuniks.nclaim.enums.Balance;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -89,7 +86,7 @@ public class ClaimService {
             return;
         }
 
-        if (!isAdmin && !isAdjacentChunk(claim, chunk)) {
+        if (!isAdmin && !claim.isChunkAdjacent(chunk)) {
             ChannelType.CHAT.send(player, plugin.getLangManager().getString("claim.land.not_adjacent"));
             return;
         }
@@ -140,34 +137,6 @@ public class ClaimService {
         }
 
         return plugin.getNconfig().getTieredPrice(nextChunkNumber);
-    }
-
-    private boolean isAdjacentChunk(Claim claim, Chunk targetChunk) {
-        int claimX = claim.getChunk().getX();
-        int claimZ = claim.getChunk().getZ();
-        int targetX = targetChunk.getX();
-        int targetZ = targetChunk.getZ();
-
-        if (isAdjacent(claimX, claimZ, targetX, targetZ)) {
-            return true;
-        }
-
-        for (String landKey : claim.getLands()) {
-            String[] coords = landKey.split(",");
-            if (coords.length >= 3) {
-                int landX = Integer.parseInt(coords[1]);
-                int landZ = Integer.parseInt(coords[2]);
-                if (isAdjacent(landX, landZ, targetX, targetZ)) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    private boolean isAdjacent(int x1, int z1, int x2, int z2) {
-        return (Math.abs(x1 - x2) == 1 && z1 == z2) || (x1 == x2 && Math.abs(z1 - z2) == 1);
     }
 
     private boolean canCreateClaim(Player player, User user, Chunk chunk) {
