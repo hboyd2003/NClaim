@@ -3,8 +3,6 @@ package nesoi.aysihuniks.nclaim.integrations;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import nesoi.aysihuniks.nclaim.NClaim;
 import nesoi.aysihuniks.nclaim.enums.Balance;
-import nesoi.aysihuniks.nclaim.model.ChunkAndClaim;
-import nesoi.aysihuniks.nclaim.model.ChunkValueResult;
 import nesoi.aysihuniks.nclaim.model.Claim;
 import nesoi.aysihuniks.nclaim.model.User;
 import org.bukkit.Bukkit;
@@ -16,9 +14,14 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.text.ParseException;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Expansion extends PlaceholderExpansion {
+    private static final Pattern WORLD_CHUNK_REGEX = Pattern.compile("((?:.*_)*.*)_((?:-\\d|\\d)\\d*)_((?:-\\d|\\d)\\d*)");
+
     private final NClaim plugin;
 
     public Expansion(NClaim plugin) {
@@ -78,8 +81,11 @@ public class Expansion extends PlaceholderExpansion {
             return handleClaimCount(params, player);
         }
 
-        if (params.startsWith("expiration_") || params.startsWith("owner_") || params.startsWith("claim_name_") ||
-                params.startsWith("coop_count_") || params.startsWith("total_size_")) {
+        if (params.startsWith("expiration_")
+                || params.startsWith("owner_")
+                || params.startsWith("claim_name_")
+                || params.startsWith("coop_count_")
+                || params.startsWith("total_size_")) {
             return handleClaimInfo(params);
         }
 
@@ -140,39 +146,30 @@ public class Expansion extends PlaceholderExpansion {
         }
     }
 
-    private ChunkValueResult getChunkValue(String params, boolean includeAllChunks) {
-        String[] parts = params.split("_");
-        if (parts.length < 5) {
-            return new ChunkValueResult(0, "Invalid format: Expected at least 5 parts");
-        }
+    private long getChunkValue(String params, boolean includeAllChunks) throws ParseException, IllegalArgumentException {
+        Claim claim = parseClaimInfo(params);
 
-        ChunkAndClaim result = parseChunkAndClaim(parts[3], parts[4], parts[5]);
-        if (result.error() != null) {
-            return new ChunkValueResult(0, result.error());
-        }
-
-        Chunk mainChunk = result.chunk();
-        Claim claim = result.claim();
-
-        if (mainChunk == null || (!includeAllChunks && claim == null)) {
-            return new ChunkValueResult(0, "Chunk not found or not claimed");
-        }
-
-        if (includeAllChunks && claim != null) {
-            return new ChunkValueResult(plugin.getBlockValueManager().calculateClaimValue(claim), null);
+        if (includeAllChunks) {
+            return plugin.getBlockValueManager().calculateClaimValue(claim);
         } else {
-            return new ChunkValueResult(plugin.getBlockValueManager().calculateChunkValue(mainChunk), null);
+            return plugin.getBlockValueManager().calculateChunkValue(claim.getChunk());
         }
     }
 
     private @NotNull String handleClaimMainValue(String params) {
-        ChunkValueResult result = getChunkValue(params, false);
-        return result.error() != null ? result.error() : String.valueOf(result.value());
+        try {
+            return String.valueOf(getChunkValue(params, false));
+        } catch (ParseException | IllegalArgumentException e) {
+            return e.getMessage();
+        }
     }
 
     private @NotNull String handleClaimTotalValue(String params) {
-        ChunkValueResult result = getChunkValue(params, true);
-        return result.error() != null ? result.error() : String.valueOf(result.value());
+        try {
+            return String.valueOf(getChunkValue(params, true));
+        } catch (ParseException | IllegalArgumentException e) {
+            return e.getMessage();
+        }
     }
 
     private @NotNull String handleBlockValue(String params) {
@@ -186,29 +183,26 @@ public class Expansion extends PlaceholderExpansion {
     }
 
     private @Nullable String handleClaimInfo(String params) {
-        String[] parts = params.split("_");
-        if (parts.length < 4) {
+        String prefix;
+        if (params.startsWith("expiration_")) {
+            prefix = "expiration";
+        } else if (params.startsWith("owner_")) {
+            prefix = "owner";
+        } else if (params.startsWith("claim_owner_")) {
+            prefix = "claim_name";
+        } else if (params.startsWith("coop_count_")) {
+            prefix = "coop_count";
+        } else if (params.startsWith("total_size_")) {
+            prefix = "total_size";
+        } else {
             return "Invalid placeholder format";
         }
 
-        String prefix = parts[0];
-        if ("coop".equals(prefix) && "count".equals(parts[1])) {
-            prefix = "coop_count";
-        } else if ("total".equals(prefix) && "size".equals(parts[1])) {
-            prefix = "total_size";
-        } else if ("claim".equals(prefix) && "owner".equals(parts[1])) {
-            prefix = "claim_name";
-        }
-
-        int worldIndex = parts.length - 3;
-        ChunkAndClaim result = parseChunkAndClaim(parts[worldIndex], parts[worldIndex + 1], parts[worldIndex + 2]);
-        if (result.error() != null) {
-            return result.error();
-        }
-
-        Claim claim = result.claim();
-        if (claim == null) {
-            return "Claim not found";
+        Claim claim;
+        try {
+            claim = parseClaimInfo(params.replace(prefix + "_", ""));
+        } catch (ParseException | IllegalArgumentException e) {
+            return e.getMessage();
         }
 
         return switch (prefix) {
@@ -221,21 +215,36 @@ public class Expansion extends PlaceholderExpansion {
         };
     }
 
-    private ChunkAndClaim parseChunkAndClaim(String worldName, String chunkXStr, String chunkZStr) {
+    private Claim parseClaimInfo(String input) throws ParseException {
+        Matcher chunkMatcher = WORLD_CHUNK_REGEX.matcher(input);
+
+        if (!chunkMatcher.matches()) throw new ParseException("Invalid claim info format", -1);
+
+        World world = Bukkit.getWorld(chunkMatcher.group(1));
+        if (world == null) throw new IllegalArgumentException("Unknown world: " + chunkMatcher.group(1));
+
+        String chunkXStr = chunkMatcher.group(2);
+        int chunkX;
         try {
-            int chunkX = Integer.parseInt(chunkXStr);
-            int chunkZ = Integer.parseInt(chunkZStr);
-
-            World world = Bukkit.getWorld(worldName);
-            if (world == null) {
-                return new ChunkAndClaim(null, null, "World not found: " + worldName);
-            }
-
-            Chunk chunk = world.getChunkAt(chunkX, chunkZ);
-            return new ChunkAndClaim(chunk, Claim.getClaim(chunk), null);
+            chunkX = Integer.parseInt(chunkXStr);
         } catch (NumberFormatException e) {
-            return new ChunkAndClaim(null, null, "Invalid coordinates");
+            throw new ParseException("Failed to parse \"" + chunkXStr + "\" into X coordinate integer", input.indexOf(chunkXStr));
         }
+
+        String chunkZStr = chunkMatcher.group(3);
+        int chunkZ;
+        try {
+            chunkZ = Integer.parseInt(chunkZStr);
+        } catch (NumberFormatException e) {
+            throw new ParseException("Failed to parse \"" + chunkXStr + "\" into Z coordinate integer", input.indexOf(chunkXStr));
+        }
+
+
+        Chunk chunk = world.getChunkAt(chunkX, chunkZ);
+        Claim claim = Claim.getClaim(chunk);
+        if (claim == null) throw new IllegalArgumentException("Claim not found");
+
+        return claim;
     }
 
     private @NotNull String handleClaimCount(String params, Player player) {
