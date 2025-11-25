@@ -49,8 +49,10 @@ public enum Permission {
 
     PLACE_WATER("Place water"),
     PLACE_LAVA("Place lava"),
+    PLACE_POWDERED_SNOW("Place powdered snow"),
     TAKE_WATER("Take water"),
     TAKE_LAVA("Take lava"),
+    TAKE_POWDERED_SNOW("Take powdered snow"),
 
     INTERACT_VILLAGER("Interact with villagers"),
     LEASH_MOBS("Leash mobs"),

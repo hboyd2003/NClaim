@@ -348,8 +348,8 @@ guis:
       interactions:
         display_name: "&6Interaction Rights"
         material: "LEVER"
-      liquids:
-        display_name: "&6Liquid Management"
+      buckets:
+        display_name: "&6Bucket Management"
         material: "WATER_BUCKET"
       entities:
         display_name: "&6Entity Interactions"
@@ -481,12 +481,18 @@ guis:
       place_lava:
         display_name: "&fPlace Lava"
         material: "LAVA_BUCKET"
+      place_powdered_snow:
+        display_name: "&fPlace Powdered Snow"
+        material: "POWDER_SNOW_BUCKET"
       take_water:
         display_name: "&fTake Water"
         material: "WATER_BUCKET"
       take_lava:
         display_name: "&fTake Lava"
         material: "LAVA_BUCKET"
+      take_powdered_snow:
+        display_name: "&fTake Powdered Snow"
+        material: "POWDER_SNOW_BUCKET"
       interact_villager:
         display_name: "&fTrade with Villagers"
         material: "EMERALD"

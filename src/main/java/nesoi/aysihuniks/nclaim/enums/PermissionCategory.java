@@ -40,9 +40,9 @@ public enum PermissionCategory {
             Permission.INTERACT_ARMOR_STAND, Permission.INTERACT_ITEM_FRAME,
             Permission.USE_ENDER_PEARL),
             
-    LIQUIDS("Liquid Permissions",
-            Permission.PLACE_WATER, Permission.PLACE_LAVA,
-            Permission.TAKE_WATER, Permission.TAKE_LAVA),
+    BUCKETS("Bukkit Permissions",
+            Permission.PLACE_WATER, Permission.PLACE_LAVA, Permission.PLACE_POWDERED_SNOW,
+            Permission.TAKE_WATER, Permission.TAKE_LAVA, Permission.TAKE_POWDERED_SNOW),
             
     ENTITIES("Entity Permissions",
             Permission.INTERACT_VILLAGER, Permission.LEASH_MOBS,

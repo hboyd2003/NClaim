@@ -494,6 +494,7 @@ public class ClaimManager implements Listener {
                     ? Permission.MISC_ENTITY_INTERACT
                     : Permission.TAKE_WATER;
             case LAVA -> Permission.TAKE_LAVA;
+            case POWDER_SNOW, POWDER_SNOW_CAULDRON -> Permission.TAKE_POWDERED_SNOW;
             default -> null;
         };
         if (permission == null) return;
@@ -519,6 +520,7 @@ public class ClaimManager implements Listener {
                  Material.TADPOLE_BUCKET,
                  Material.TROPICAL_FISH_BUCKET -> Permission.PLACE_WATER;
             case Material.LAVA_BUCKET -> Permission.PLACE_LAVA;
+            case Material.POWDER_SNOW_BUCKET -> Permission.PLACE_POWDERED_SNOW;
             default -> throw new IllegalStateException("Unexpected value for bucket use: " + event.getBucket());
         };
         cancelIfNoPermission(event.getPlayer(), claim.get(), permission, event, "interact");
