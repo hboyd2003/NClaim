@@ -13,7 +13,6 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.nandayo.dapi.guimanager.button.Button;
 import org.nandayo.dapi.guimanager.button.SingleSlotButton;
 import org.nandayo.dapi.util.ItemCreator;
@@ -42,7 +41,8 @@ public class ClaimSettingsMenu extends BaseMenu {
             new SettingData(Setting.MONSTER_SPAWNING, "monster_spawning", getMaterial("settings.monster_spawning")),
             new SettingData(Setting.ANIMAL_SPAWNING, "animal_spawning", getMaterial("settings.animal_spawning")),
             new SettingData(Setting.VILLAGER_INTERACTION, "villager_interactions", getMaterial("settings.villager_interactions")),
-            new SettingData(Setting.SHOW_HOLOGRAM, "show_hologram", getMaterial("settings.show_hologram"))
+            new SettingData(Setting.SHOW_HOLOGRAM, "show_hologram", getMaterial("settings.show_hologram")),
+            new SettingData(Setting.ALLOW_LIQUID_INFLOW, "allow_liquid_inflow", getMaterial("settings.allow_liquid_inflow"))
     );
 
     public ClaimSettingsMenu(Player player, Claim claim, int page, boolean admin) {

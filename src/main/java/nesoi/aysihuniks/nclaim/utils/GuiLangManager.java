@@ -136,6 +136,7 @@ public class GuiLangManager {
             case "animal_spawning" -> Setting.ANIMAL_SPAWNING;
             case "villager_interactions" -> Setting.VILLAGER_INTERACTION;
             case "show_hologram" -> Setting.SHOW_HOLOGRAM;
+            case "allow_liquid_inflow" -> Setting.ALLOW_LIQUID_INFLOW;
             default -> null;
         };
     }

@@ -15,6 +15,7 @@ public class ClaimSetting {
         put(Setting.ANIMAL_SPAWNING, true);
         put(Setting.VILLAGER_INTERACTION, false);
         put(Setting.SHOW_HOLOGRAM, true);
+        put(Setting.ALLOW_LIQUID_INFLOW, false);
     }};
 
     public boolean isEnabled(Setting setting) {

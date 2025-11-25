@@ -638,6 +638,21 @@ guis:
           - "&7Status: {status}"
           - ""
           - "&eClick to toggle"
+      allow_liquid_inflow:
+        default_value: false
+        changeable: true
+        # permission: "nclaim.change_claim_villager_interaction_setting"
+        display_name: "&6Liquid Inflow"
+        material: "WATER_BUCKET"
+        lore:
+          - ""
+          - "&fAllow liquid to flow from into this claim"
+          - "&fLiquids flowing between adjacent claims of"
+          - "&fthe same owner bypass this permission"
+          - ""
+          - "&7Status: {status}"
+          - ""
+          - "&eClick to toggle"
 
   claim_block_management_menu:
     title: "Claim Block Management - {claim_name}"
