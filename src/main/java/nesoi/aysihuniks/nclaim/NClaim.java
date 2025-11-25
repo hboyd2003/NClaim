@@ -314,10 +314,12 @@ public final class NClaim extends JavaPlugin {
     }
 
     private boolean worldGuardEnabled;
+    private Worldguard worldguard;
 
     private void setupWorldGuard() {
         if (getServer().getPluginManager().getPlugin("WorldGuard") != null) {
             worldGuardEnabled = true;
+            this.worldguard = new Worldguard();
             Util.log("&aWorldGuard integration enabled successfully!");
         } else {
             worldGuardEnabled = false;

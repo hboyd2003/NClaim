@@ -1,11 +1,5 @@
 package nesoi.aysihuniks.nclaim.service;
 
-import com.sk89q.worldedit.bukkit.BukkitAdapter;
-import com.sk89q.worldguard.WorldGuard;
-import com.sk89q.worldguard.protection.ApplicableRegionSet;
-import com.sk89q.worldguard.protection.managers.RegionManager;
-import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-import com.sk89q.worldguard.protection.regions.RegionContainer;
 import lombok.RequiredArgsConstructor;
 import nesoi.aysihuniks.nclaim.NClaim;
 import nesoi.aysihuniks.nclaim.api.events.ClaimEnterEvent;
@@ -25,13 +19,16 @@ import org.bukkit.event.*;
 import org.bukkit.event.block.*;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
+import org.bukkit.event.hanging.HangingPlaceEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
+import org.bukkit.inventory.ItemType;
+import org.jetbrains.annotations.NotNull;
 import org.nandayo.dapi.message.ChannelType;
-import org.nandayo.dapi.object.DEntityType;
 
 import java.util.*;
 
+@SuppressWarnings("UnstableApiUsage")
 @RequiredArgsConstructor
 public class ClaimManager implements Listener {
     private final NClaim plugin;
@@ -58,8 +55,7 @@ public class ClaimManager implements Listener {
         return !claim.getOwner().equals(uuid) && !claim.getCoopPlayers().contains(uuid);
     }
 
-    private boolean cancelIfNotClaimMember(Player player, Claim claim, Cancellable event) {
-        if (claim == null) return false;
+    private boolean cancelIfNotClaimMember(@NotNull Player player, @NotNull Claim claim, Cancellable event) {
         if (hasClaimBypass(player, "")) return false;
         if (isNotClaimMember(player, claim)) {
             event.setCancelled(true);
@@ -78,54 +74,37 @@ public class ClaimManager implements Listener {
         }
     }
 
-    private Player getPlayerFromEntity(Entity entity) {
-        if (entity instanceof Player) {
-            return (Player) entity;
-        } else if (entity instanceof Projectile projectile) {
-            if (projectile.getShooter() instanceof Player) {
-                return (Player) projectile.getShooter();
-            }
-        }
-        return null;
-    }
-
     @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerMove(PlayerMoveEvent event) {
         if (event.isCancelled()) return;
-        Player player = event.getPlayer();
         Chunk fromChunk = event.getFrom().getChunk();
         Chunk toChunk = event.getTo().getChunk();
-        if (fromChunk.equals(toChunk)) return;
-        if (NClaim.inst().getNconfig().getBlacklistedWorlds().contains(player.getWorld().getName())) return;
-        if (NClaim.inst().isWorldGuardEnabled()) {
-            RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
-            World world = event.getTo().getWorld();
-            if (world != null) {
-                RegionManager regions = container.get(BukkitAdapter.adapt(world));
-                if (regions != null) {
-                    ApplicableRegionSet regionSet = regions.getApplicableRegions(BukkitAdapter.asBlockVector(event.getTo()));
-                    for (ProtectedRegion region : regionSet) {
-                        if (NClaim.inst().getNconfig().getBlacklistedRegions().contains(region.getId())) {
-                            return;
-                        }
-                    }
-                }
-            }
-        }
+
+        if (fromChunk.getChunkKey() == toChunk.getChunkKey()) return; // Return if we stay within the same chunk
+
+        if (NClaim.inst().getNconfig().getBlacklistedWorlds().contains(event.getPlayer().getWorld().getName())) return;
+
+        if (NClaim.inst().isWorldGuardEnabled() && NClaim.inst().getWorldguard().isInBlacklistedRegion(event.getTo()))
+            return;
+
         Optional<Claim> fromClaim = Claim.getClaim(fromChunk);
         Optional<Claim> toClaim = Claim.getClaim(toChunk);
-        if (fromClaim.isPresent() && (!fromClaim.equals(toClaim))) {
-            ClaimLeaveEvent leaveEvent = new ClaimLeaveEvent(player, fromClaim.get());
+        if (fromClaim.isPresent() && toClaim.isPresent() && fromClaim.get().equals(toClaim.get())) return;
+
+        // Moved into unclaimed
+        if (fromClaim.isPresent() && toClaim.isEmpty()) {
+            ClaimLeaveEvent leaveEvent = new ClaimLeaveEvent(event.getPlayer(), fromClaim.get());
             Bukkit.getPluginManager().callEvent(leaveEvent);
-            LangManager.sendSortedMessage(player, plugin.getLangManager().getString("move.unclaimed_chunk"));
-        }
-        if (toClaim.isPresent() && (fromClaim.isEmpty() || !fromClaim.equals(toClaim))) {
-            ClaimEnterEvent enterEvent = new ClaimEnterEvent(toClaim.get(), player);
-            Bukkit.getPluginManager().callEvent(enterEvent);
+            LangManager.sendSortedMessage(event.getPlayer(), plugin.getLangManager().getString("move.unclaimed_chunk"));
+        } else if (toClaim.isPresent()) { // Moved into claim
+            Bukkit.getPluginManager().callEvent(new ClaimEnterEvent(toClaim.get(), event.getPlayer()));
+
             boolean isPvpEnabled = NClaim.inst().getClaimSettingsManager().isSettingEnabled(toClaim.get(), Setting.CLAIM_PVP);
             String pvpStatus = plugin.getLangManager().getString(isPvpEnabled ? "move.pvp_enabled" : "move.pvp_disabled");
+
             OfflinePlayer owner = Bukkit.getOfflinePlayer(toClaim.get().getOwner());
-            LangManager.sendSortedMessage(player, plugin.getLangManager().getString("move.claimed_chunk")
+
+            LangManager.sendSortedMessage(event.getPlayer(), plugin.getLangManager().getString("move.claimed_chunk")
                     .replace("{owner}", owner.getName() != null ? owner.getName() : "Unknown")
                     .replace("{claim_name}", toClaim.get().getClaimName())
                     .replace("{pvp_status}", pvpStatus));
@@ -135,172 +114,197 @@ public class ClaimManager implements Listener {
     @EventHandler(priority = EventPriority.HIGH)
     public void onEntityExplode(EntityExplodeEvent event) {
         if (event.isCancelled()) return;
-        Location explodeLocation = event.getLocation();
-        Optional<Claim> explodeClaim = Claim.getClaim(explodeLocation.getChunk());
-        Entity explodingEntity = event.getEntity();
-        boolean isTNT = explodingEntity.getType() == NClaim.getEntityType(DEntityType.TNT, DEntityType.PRIMED_TNT) ||
-                explodingEntity.getType() == NClaim.getEntityType(DEntityType.MINECART_TNT, DEntityType.TNT_MINECART);
-        boolean isCreeper = explodingEntity.getType() == EntityType.CREEPER;
-        List<Block> blocksToRemove = new ArrayList<>();
-        for (Block block : event.blockList()) {
+
+        Optional<Claim> explodeClaim = Claim.getClaim(event.getLocation().getChunk());
+        if (explodeClaim.isEmpty()) return;
+
+        Setting setting = switch (event.getEntity()) {
+            case TNTPrimed ignored -> Setting.TNT_DAMAGE;
+            case ExplosiveMinecart ignored -> Setting.TNT_DAMAGE;
+            case Creeper ignored -> Setting.CREEPER_DAMAGE;
+            default -> null;
+        };
+        if (setting == null) return;
+
+        event.blockList().removeIf(block -> {
             Optional<Claim> blockClaim = Claim.getClaim(block.getChunk());
-            if (blockClaim.isPresent()) {
-                if ((isTNT && !plugin.getClaimSettingsManager().isSettingEnabled(blockClaim.get(), Setting.TNT_DAMAGE)) ||
-                        (isCreeper && !plugin.getClaimSettingsManager().isSettingEnabled(blockClaim.get(), Setting.CREEPER_DAMAGE))) {
-                    blocksToRemove.add(block);
-                }
-            }
-        }
-        event.blockList().removeAll(blocksToRemove);
-        if (explodeClaim.isPresent()) {
-            if ((isTNT && !plugin.getClaimSettingsManager().isSettingEnabled(explodeClaim.get(), Setting.TNT_DAMAGE)) ||
-                    (isCreeper && !plugin.getClaimSettingsManager().isSettingEnabled(explodeClaim.get(), Setting.CREEPER_DAMAGE))) {
-                event.setCancelled(true);
-            }
-        }
+            return blockClaim.isPresent() && !plugin.getClaimSettingsManager().isSettingEnabled(blockClaim.get(), setting);
+        });
     }
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerTeleport(PlayerTeleportEvent event) {
-        if (event.isCancelled()) return;
-        if (event.getCause() != PlayerTeleportEvent.TeleportCause.ENDER_PEARL) return;
+        if (event.isCancelled() || event.getCause() != PlayerTeleportEvent.TeleportCause.ENDER_PEARL) return;
         Player player = event.getPlayer();
-        Location location = event.getTo();
-        Chunk chunk = location.getChunk();
-        Optional<Claim> targetClaim = Claim.getClaim(chunk);
+        Optional<Claim> targetClaim = Claim.getClaim(event.getTo().getChunk());
         if (targetClaim.isEmpty()) return;
+
         cancelIfNotClaimMember(player, targetClaim.get(), event);
         cancelIfNoPermission(player, targetClaim.get(), Permission.USE_ENDER_PEARL, event, "teleport");
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onHangingBreakByEntity(HangingBreakByEntityEvent event) {
-        Entity remover = event.getRemover();
         Hanging hanging = event.getEntity();
         if (!(hanging instanceof ItemFrame || hanging instanceof Painting)) return;
-        Player player = getPlayerFromEntity(remover);
-        if (player == null) return;
+
+        if (!(event.getRemover() instanceof Player player)) return;
+
         Optional<Claim> claim = Claim.getClaim(hanging.getLocation().getChunk());
         if (claim.isEmpty()) return;
+
         if (cancelIfNotClaimMember(player, claim.get(), event)) return;
-        Permission perm = hanging instanceof Painting ? Permission.PLACE_BLOCKS : Permission.INTERACT_ITEM_FRAME;
-        cancelIfNoPermission(player, claim.get(), perm, event, "interact");
+        cancelIfNoPermission(player, claim.get(), Permission.BREAK_BLOCKS, event, "interact");
+    }
+
+    @EventHandler
+    public void onHangingPlaceEvent(HangingPlaceEvent event) {
+        if (event.getPlayer() == null) return;
+
+        Hanging hanging = event.getEntity();
+        if (!(hanging instanceof ItemFrame || hanging instanceof Painting)) return;
+
+        Optional<Claim> claim = Claim.getClaim(hanging.getLocation().getChunk());
+        if (claim.isEmpty()) return;
+
+        if (cancelIfNotClaimMember(event.getPlayer(), claim.get(), event)) return;
+        cancelIfNoPermission(event.getPlayer(), claim.get(), Permission.PLACE_BLOCKS, event, "interact");
     }
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
-        if (event.getEntity() instanceof Player damaged) {
-            Player damager = getPlayerFromEntity(event.getDamager());
-            if (damager != null && !hasClaimBypass(damager, "pvp")) {
-                Optional<Claim> damagedClaim = Claim.getClaim(damaged.getLocation().getChunk());
-                Optional<Claim> damagerClaim = Claim.getClaim(damager.getLocation().getChunk());
-                if ((damagedClaim.isPresent() && !plugin.getClaimSettingsManager().isSettingEnabled(damagedClaim.get(), Setting.CLAIM_PVP)) ||
-                        (damagerClaim.isPresent() && !plugin.getClaimSettingsManager().isSettingEnabled(damagerClaim.get(), Setting.CLAIM_PVP))) {
-                    event.setCancelled(true);
-                    return;
-                }
+        Optional<Claim> claim = Claim.getClaim(event.getEntity().getLocation().getChunk());
+        if (claim.isEmpty()) return;
+
+        Entity damaged = event.getEntity();
+        Entity damager = event.getDamager();
+        if (damager instanceof Projectile projectile) {
+            damager = (Entity) projectile.getShooter();
+        }
+
+        // PvP
+        if (damaged instanceof Player
+                && damager instanceof Player
+                && !hasClaimBypass((Player) damager, "pvp")) {
+            boolean damagedNotInPVPClaim = Claim.getClaim(damaged.getLocation().getChunk())
+                    .map(damagedClaim-> !plugin.getClaimSettingsManager().isSettingEnabled(damagedClaim, Setting.CLAIM_PVP))
+                    .orElse(false);
+
+            boolean damagerNotInPVPClaim = Claim.getClaim(damager.getLocation().getChunk())
+                    .map(damagerClaim-> !plugin.getClaimSettingsManager().isSettingEnabled(damagerClaim, Setting.CLAIM_PVP))
+                    .orElse(false);
+
+            if (damagedNotInPVPClaim || damagerNotInPVPClaim) {
+                event.setCancelled(true);
+                return;
             }
         }
-        if (event.getEntity() instanceof ItemFrame || event.getEntity() instanceof Painting || event.getEntity() instanceof ArmorStand) {
-            Player player = getPlayerFromEntity(event.getDamager());
-            if (player == null) return;
-            Optional<Claim> claim = Claim.getClaim(event.getEntity().getLocation().getChunk());
-            if (claim.isEmpty()) return;
-            if (cancelIfNotClaimMember(player, claim.get(), event)) return;
-            Permission perm = Permission.INTERACT_ITEM_FRAME;
-            if (event.getEntity() instanceof Painting) perm = Permission.PLACE_BLOCKS;
-            else if (event.getEntity() instanceof ArmorStand) perm = Permission.INTERACT_ARMOR_STAND;
-            cancelIfNoPermission(player, claim.get(), perm, event, "interact");
+
+        // Player removes item from item frame
+        if (damaged instanceof ItemFrame) {
+            if (!(damager instanceof Player damagerPlayer)) return;
+
+            if (cancelIfNotClaimMember(damagerPlayer, claim.get(), event)) return;
+
+            cancelIfNoPermission(damagerPlayer, claim.get(), Permission.INTERACT_ITEM_FRAME, event, "interact");
+        }
+
+        // Player breaks an entity block
+        if (damaged instanceof Painting || damaged instanceof ArmorStand) {
+            if (!(damager instanceof Player damagerPlayer)) return;
+
+            if (cancelIfNotClaimMember(damagerPlayer, claim.get(), event)) return;
+
+            cancelIfNoPermission(damagerPlayer, claim.get(), Permission.BREAK_BLOCKS, event, "interact");
+        }
+
+        boolean mobAttackingEnabled = plugin.getClaimSettingsManager().isSettingEnabled(claim.get(), Setting.MOB_ATTACKING);
+
+        // Player damaging monster
+        if (damaged instanceof Player damagedPlayer
+                && damager instanceof Monster
+                && !mobAttackingEnabled
+                && isNotClaimMember(damagedPlayer, claim.get())) {
+            event.setCancelled(true);
             return;
         }
-        if (event.getEntity() instanceof Player player && event.getDamager() instanceof Monster) {
-            Optional<Claim> claim = Claim.getClaim(player.getLocation().getChunk());
-            if (claim.isPresent()) {
-                boolean mobAttackingEnabled = plugin.getClaimSettingsManager().isSettingEnabled(claim.get(), Setting.MOB_ATTACKING);
-                if (!mobAttackingEnabled && isNotClaimMember(player, claim.get())) {
-                    event.setCancelled(true);
-                    return;
-                }
-            }
-        }
-        if (event.getEntity() instanceof Monster && event.getDamager() instanceof Player damager) {
-            Optional<Claim> claim = Claim.getClaim(event.getEntity().getLocation().getChunk());
-            if (claim.isPresent() && !hasClaimBypass(damager, "mob_attacking")) {
-                boolean mobAttackingEnabled = plugin.getClaimSettingsManager().isSettingEnabled(claim.get(), Setting.MOB_ATTACKING);
-                if (!mobAttackingEnabled && isNotClaimMember(damager, claim.get())) {
-                    event.setCancelled(true);
-                    return;
-                }
-            }
-        }
-        if (event.getEntity() instanceof Villager) {
-            Player damager = getPlayerFromEntity(event.getDamager());
-            if (damager == null) return;
-            Optional<Claim> claim = Claim.getClaim(event.getEntity().getLocation().getChunk());
-            if (claim.isEmpty()) return;
-            if (cancelIfNotClaimMember(damager, claim.get(), event)) return;
-            cancelIfNoPermission(damager, claim.get(), Permission.INTERACT_VILLAGER, event, "interact");
+
+        // Monster damaging player
+        if (damaged instanceof Monster
+                && damager instanceof Player damagerPlayer
+                && !hasClaimBypass(damagerPlayer, "mob_attacking")
+                && !mobAttackingEnabled
+                && isNotClaimMember(damagerPlayer, claim.get())) {
+            event.setCancelled(true);
             return;
         }
-        if (event.getEntity() instanceof LivingEntity) {
-            Entity damager = event.getDamager();
-            Optional<Claim> claim = Claim.getClaim(event.getEntity().getLocation().getChunk());
-            if (claim.isPresent()) {
-                if ((damager instanceof TNTPrimed || damager instanceof ExplosiveMinecart) &&
-                        !plugin.getClaimSettingsManager().isSettingEnabled(claim.get(), Setting.TNT_DAMAGE)) {
-                    event.setCancelled(true);
-                } else if (damager instanceof Creeper &&
-                        !plugin.getClaimSettingsManager().isSettingEnabled(claim.get(), Setting.CREEPER_DAMAGE)) {
-                    event.setCancelled(true);
-                }
-            }
+
+        // Explosion damaging entity
+        if (damaged instanceof LivingEntity
+                || damaged instanceof ItemFrame
+                || damaged instanceof Painting) {
+            Setting setting = switch (damager) {
+                case TNTPrimed ignored -> Setting.TNT_DAMAGE;
+                case ExplosiveMinecart ignored -> Setting.TNT_DAMAGE;
+                case Creeper ignored -> Setting.CREEPER_DAMAGE;
+                case null, default -> null;
+            };
+            if (setting == null) return;
+
+            if (!plugin.getClaimSettingsManager().isSettingEnabled(claim.get(), setting)) event.setCancelled(true);
         }
     }
 
     @EventHandler
     public void windCharge(ExplosionPrimeEvent event) {
-        EntityType type = event.getEntity().getType();
-        if (type == EntityType.WIND_CHARGE || type == EntityType.BREEZE_WIND_CHARGE) {
-            Optional<Claim> claim = Claim.getClaim(event.getEntity().getLocation().getChunk());
-            if (claim.isPresent() && event.getEntity() instanceof Projectile projectile) {
-                if (projectile.getShooter() instanceof Player player) {
-                    if (cancelIfNotClaimMember(player, claim.get(), event)) return;
-                    cancelIfNoPermission(player, claim.get(), Permission.PLACE_BLOCKS, event, "place");
-                }
-            }
-        }
+        if (!(event.getEntity() instanceof Projectile projectile)) return;
+
+        if (projectile.getType() != EntityType.WIND_CHARGE
+                && projectile.getType() != EntityType.BREEZE_WIND_CHARGE) return;
+
+        Optional<Claim> claim = Claim.getClaim(projectile.getLocation().getChunk());
+        if (claim.isEmpty()) return;
+
+        if ((!(projectile.getShooter() instanceof Player player))) return;
+
+        if (cancelIfNotClaimMember(player, claim.get(), event)) return;
+        cancelIfNoPermission(player, claim.get(), Permission.PLACE_BLOCKS, event, "place");
     }
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onProjectileHit(ProjectileHitEvent event) {
         Projectile projectile = event.getEntity();
-        if (!projectile.getType().name().equalsIgnoreCase("WIND_CHARGE")) return;
+        if (projectile.getType() != EntityType.WIND_CHARGE && projectile.getType() != EntityType.BREEZE_WIND_CHARGE) return;
+
         Block hitBlock = event.getHitBlock();
         if (hitBlock == null || !(projectile.getShooter() instanceof Player player)) return;
+
         Optional<Claim> claim = Claim.getClaim(hitBlock.getChunk());
         if (claim.isEmpty()) return;
+
         if (cancelIfNotClaimMember(player, claim.get(), event)) return;
-        Material type = hitBlock.getType();
-        if (Tag.BUTTONS.isTagged(type) || Tag.PRESSURE_PLATES.isTagged(type) ||
-                Tag.DOORS.isTagged(type) || Tag.TRAPDOORS.isTagged(type) || Tag.FENCE_GATES.isTagged(type)) {
-            cancelIfNoPermission(player, claim.get(), Permission.USE_DOORS, event, "interact");
-        }
+
+        Permission permission;
+        if (Tag.DOORS.isTagged(hitBlock.getType())) permission = Permission.USE_DOORS;
+        else if (Tag.PRESSURE_PLATES.isTagged(hitBlock.getType())) permission = Permission.USE_PRESSURE_PLATES;
+        else if (Tag.TRAPDOORS.isTagged(hitBlock.getType())) permission = Permission.USE_TRAPDOORS;
+        else if (Tag.FENCE_GATES.isTagged(hitBlock.getType())) permission = Permission.USE_GATES;
+        else return;
+
+        cancelIfNoPermission(player, claim.get(), permission, event, "interact");
     }
 
     @EventHandler
     public void onCreatureSpawn(CreatureSpawnEvent event) {
         if (event.isCancelled()) return;
         if (event.getSpawnReason() != CreatureSpawnEvent.SpawnReason.NATURAL) return;
+
         Optional<Claim> claim = Claim.getClaim(event.getLocation().getChunk());
         if (claim.isEmpty()) return;
-        if (event.getEntity() instanceof Monster) {
-            if (!plugin.getClaimSettingsManager().isSettingEnabled(claim.get(), Setting.MONSTER_SPAWNING)) {
-                event.setCancelled(true);
-            }
-        } else {
-            if (!plugin.getClaimSettingsManager().isSettingEnabled(claim.get(), Setting.ANIMAL_SPAWNING)) {
-                event.setCancelled(true);
-            }
+
+        Setting setting = event.getEntity() instanceof Monster ? Setting.MONSTER_SPAWNING : Setting.ANIMAL_SPAWNING;
+        if (!plugin.getClaimSettingsManager().isSettingEnabled(claim.get(), setting)) {
+            event.setCancelled(true);
         }
     }
 
@@ -309,66 +313,63 @@ public class ClaimManager implements Listener {
         if (event.isCancelled()) return;
         Player player = event.getPlayer();
         Block block = event.getBlock();
+
         Optional<Claim> claim = Claim.getClaim(block.getChunk());
-        if (claim.isPresent() && block.getType() == claim.get().getClaimBlockType() &&
-                block.getLocation().equals(claim.get().getClaimBlockLocation()) && !player.isSneaking()) {
+        if (claim.isEmpty()) return;
+
+        if (cancelIfNotClaimMember(player, claim.get(), event)) return;
+
+        if (block.getType() == claim.get().getClaimBlockType()
+                && block.getLocation().equals(claim.get().getClaimBlockLocation())
+                && !player.isSneaking()) {
             event.setCancelled(true);
             return;
         }
-        if (claim.isEmpty()) return;
-        if (cancelIfNotClaimMember(player, claim.get(), event)) return;
-        Permission permission = Permission.BREAK_BLOCKS;
-        if (block.getType() == Material.SPAWNER) permission = Permission.BREAK_SPAWNER;
-        else if (block.getType() == Material.ITEM_FRAME || block.getType() == Material.GLOW_ITEM_FRAME) permission = Permission.INTERACT_ITEM_FRAME;
-        else if (block.getType() == Material.PAINTING) permission = Permission.PLACE_BLOCKS;
+        Permission permission = block.getType() == Material.SPAWNER ? Permission.BREAK_SPAWNER : Permission.BREAK_BLOCKS;
         cancelIfNoPermission(player, claim.get(), permission, event, "break");
     }
 
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
         if (event.isCancelled()) return;
-        Player player = event.getPlayer();
-        Block block = event.getBlock();
-        Optional<Claim> claim = Claim.getClaim(block.getChunk());
-        if (claim.isEmpty()) return;
-        if (cancelIfNotClaimMember(player, claim.get(), event)) return;
-        Permission permission = blockPlacePermission(event);
-        cancelIfNoPermission(player, claim.get(), permission, event, "place");
-    }
 
-    private Permission blockPlacePermission(BlockPlaceEvent event) {
-        Material type = event.getBlock().getType();
-        return switch (type) {
-            case SPAWNER -> Permission.PLACE_SPAWNER;
-            case CAMPFIRE -> Permission.USE_CAMPFIRE;
-            case SOUL_CAMPFIRE -> Permission.USE_SOUL_CAMPFIRE;
-            default -> Permission.PLACE_BLOCKS;
-        };
+        Optional<Claim> claim = Claim.getClaim(event.getBlock().getChunk());
+        if (claim.isEmpty()) return;
+
+        if (cancelIfNotClaimMember(event.getPlayer(), claim.get(), event)) return;
+
+        Permission permission = event.getBlock().getType() == Material.SPAWNER ? Permission.PLACE_SPAWNER : Permission.PLACE_BLOCKS;
+        cancelIfNoPermission(event.getPlayer(), claim.get(), permission, event, "place");
     }
 
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
         if (event.useInteractedBlock() == Event.Result.DENY) return;
-        Player player = event.getPlayer();
+
         Block block = event.getClickedBlock();
         if (block == null) return;
+
+        Player player = event.getPlayer();
+
         Optional<Claim> claim = Claim.getClaim(block.getChunk());
         if (claim.isEmpty()) return;
 
-        if (block.getType() == claim.get().getClaimBlockType() && claim.get().getClaimBlockLocation().equals(block.getLocation())) {
-            if (player.hasPermission("nclaim.admin") && player.isSneaking() && event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
-                new ClaimManagementMenu(player, claim.get(), true);
-            }
-            else if ((player.hasPermission("nclaim.admin") ||
+        // Claim block
+        if (block.getType() == claim.get().getClaimBlockType()
+                && claim.get().getClaimBlockLocation().equals(block.getLocation())) {
+            if ((player.hasPermission("nclaim.admin") ||
                     coopManager.isClaimOwner(claim.get(), player) ||
                     coopManager.hasPermission(player, claim.get(), Permission.OPEN_CLAIM_MENU))
                     && event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
-                new ClaimManagementMenu(player, claim.get(), false);
+                new ClaimManagementMenu(player, claim.get(), player.hasPermission("nclaim.admin") && player.isSneaking());
             }
+            event.setCancelled(true);
             return;
         }
+
         if (hasClaimBypass(player, "interact")) return;
         if (cancelIfNotClaimMember(player, claim.get(), event)) return;
+
         Permission permission = getInteractPermission(block.getType());
         if (permission == null) return;
         cancelIfNoPermission(player, claim.get(), permission, event, "interact");
@@ -434,31 +435,35 @@ public class ClaimManager implements Listener {
 
         Optional<Claim> claim = Claim.getClaim(entity.getLocation().getChunk());
         if (claim.isEmpty()) return;
+
         if (cancelIfNotClaimMember(player, claim.get(), event)) return;
+
         Permission permission = switch (entity) {
             case Villager ignored -> Permission.INTERACT_VILLAGER;
             case ItemFrame ignored -> Permission.INTERACT_ITEM_FRAME;
             default -> Permission.MISC_ENTITY_INTERACT;
         };
-
         cancelIfNoPermission(player, claim.get(), permission, event, "interact");
     }
 
     @EventHandler
     public void onArmorStandManipulate(PlayerArmorStandManipulateEvent event) {
         if (event.isCancelled()) return;
-        Player player = event.getPlayer();
+
         Optional<Claim> claim = Claim.getClaim(event.getRightClicked().getLocation().getChunk());
         if (claim.isEmpty()) return;
-        if (cancelIfNotClaimMember(player, claim.get(), event)) return;
-        cancelIfNoPermission(player, claim.get(), Permission.INTERACT_ARMOR_STAND, event, "interact");
+
+        if (cancelIfNotClaimMember(event.getPlayer(), claim.get(), event)) return;
+        cancelIfNoPermission(event.getPlayer(), claim.get(), Permission.INTERACT_ARMOR_STAND, event, "interact");
     }
 
     @EventHandler
     public void onVehicleEnter(VehicleEnterEvent event) {
         if (!(event.getEntered() instanceof Player player)) return;
+
         Optional<Claim> claim = Claim.getClaim(event.getVehicle().getLocation().getChunk());
         if (claim.isEmpty()) return;
+
         if (cancelIfNotClaimMember(player, claim.get(), event)) return;
         cancelIfNoPermission(player, claim.get(), Permission.RIDE_ENTITIES, event, "interact");
     }
@@ -466,42 +471,57 @@ public class ClaimManager implements Listener {
     @EventHandler
     public void onPlayerLeashEntity(PlayerLeashEntityEvent event) {
         if (event.isCancelled()) return;
-        Player player = event.getPlayer();
+
         Optional<Claim> claim = Claim.getClaim(event.getEntity().getLocation().getChunk());
         if (claim.isEmpty()) return;
-        if (cancelIfNotClaimMember(player, claim.get(), event)) return;
-        cancelIfNoPermission(player, claim.get(), Permission.LEASH_MOBS, event, "interact");
+
+        if (cancelIfNotClaimMember(event.getPlayer(), claim.get(), event)) return;
+        cancelIfNoPermission(event.getPlayer(), claim.get(), Permission.LEASH_MOBS, event, "interact");
     }
 
     @EventHandler
     public void onPlayerBucketFill(PlayerBucketFillEvent event) {
-        Player player = event.getPlayer();
+        if (event.isCancelled()
+                || hasClaimBypass(event.getPlayer(), "interact")) return;
+
         Optional<Claim> claim = Claim.getClaim(event.getBlock().getChunk());
         if (claim.isEmpty()) return;
-        if (hasClaimBypass(player, "interact")) return;
-        if (cancelIfNotClaimMember(player, claim.get(), event)) return;
-        Permission permission = null;
-        if (event.getBlockClicked().getType() == Material.WATER) permission = Permission.TAKE_WATER;
-        else if (event.getBlockClicked().getType() == Material.LAVA) permission = Permission.TAKE_LAVA;
-        if (permission != null) {
-            cancelIfNoPermission(player, claim.get(), permission, event, "interact");
-        }
+
+        if (cancelIfNotClaimMember(event.getPlayer(), claim.get(), event)) return;
+
+        Permission permission = switch (event.getBlock().getType()) {
+            case WATER -> event.getBucket().asItemType() == ItemType.WATER_BUCKET
+                    ? Permission.MISC_ENTITY_INTERACT
+                    : Permission.TAKE_WATER;
+            case LAVA -> Permission.TAKE_LAVA;
+            default -> null;
+        };
+        if (permission == null) return;
+        cancelIfNoPermission(event.getPlayer(), claim.get(), permission, event, "interact");
     }
 
     @EventHandler
     public void onPlayerBucketEmpty(PlayerBucketEmptyEvent event) {
-        if (event.isCancelled()) return;
-        Player player = event.getPlayer();
+        if (event.isCancelled()
+                || hasClaimBypass(event.getPlayer(), "interact")) return;
+
         Optional<Claim> claim = Claim.getClaim(event.getBlock().getChunk());
         if (claim.isEmpty()) return;
-        if (hasClaimBypass(player, "interact")) return;
-        if (cancelIfNotClaimMember(player, claim.get(), event)) return;
-        Permission permission = null;
-        if (event.getBucket() == Material.WATER_BUCKET) permission = Permission.PLACE_WATER;
-        else if (event.getBucket() == Material.LAVA_BUCKET) permission = Permission.PLACE_LAVA;
-        if (permission != null) {
-            cancelIfNoPermission(player, claim.get(), permission, event, "interact");
-        }
+
+        if (cancelIfNotClaimMember(event.getPlayer(), claim.get(), event)) return;
+
+        Permission permission = switch (event.getBucket()) {
+            case Material.WATER_BUCKET,
+                 Material.AXOLOTL_BUCKET,
+                 Material.COD_BUCKET,
+                 Material.PUFFERFISH_BUCKET,
+                 Material.SALMON_BUCKET,
+                 Material.TADPOLE_BUCKET,
+                 Material.TROPICAL_FISH_BUCKET -> Permission.PLACE_WATER;
+            case Material.LAVA_BUCKET -> Permission.PLACE_LAVA;
+            default -> throw new IllegalStateException("Unexpected value for bucket use: " + event.getBucket());
+        };
+        cancelIfNoPermission(event.getPlayer(), claim.get(), permission, event, "interact");
     }
 
     @EventHandler
@@ -512,20 +532,24 @@ public class ClaimManager implements Listener {
         if (fromBlock.getType() != Material.WATER && fromBlock.getType() != Material.LAVA) {
             return;
         }
+
         Optional<Claim> fromClaim = Claim.getClaim(fromBlock.getChunk());
         Optional<Claim> toClaim = Claim.getClaim(toBlock.getChunk());
-        if (fromClaim.isEmpty() && toClaim.isPresent()) {
+        if (toClaim.isEmpty() || toClaim.get().getSettings().isEnabled(Setting.ALLOW_LIQUID_INFLOW)) return;
+
+        if (fromClaim.isEmpty() || !fromClaim.get().getOwner().equals(toClaim.get().getOwner()))
             event.setCancelled(true);
-        }
     }
 
     @EventHandler
     public void onEntityChangeBlock(EntityChangeBlockEvent event) {
-        if (event.getBlock().getType() == Material.FARMLAND && event.getEntity() instanceof Player player) {
-            Optional<Claim> claim = Claim.getClaim(event.getBlock().getChunk());
-            if (claim.isEmpty()) return;
-            if (cancelIfNotClaimMember(player, claim.get(), event)) event.setCancelled(true);
-        }
+        if (!(event.getBlock().getType() == Material.FARMLAND && event.getEntity() instanceof Player player)) return;
+
+        Optional<Claim> claim = Claim.getClaim(event.getBlock().getChunk());
+        if (claim.isEmpty()) return;
+
+        if (cancelIfNotClaimMember(player, claim.get(), event)) event.setCancelled(true);
+
     }
 
     @EventHandler
