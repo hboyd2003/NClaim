@@ -12,10 +12,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.nandayo.dapi.util.HexUtil;
 import org.nandayo.dapi.util.Util;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -87,9 +84,8 @@ public class HologramManager {
             }
 
             Chunk chunk = world.getChunkAt(chunkInfo.x, chunkInfo.z);
-            Claim claim = Claim.getClaim(chunk);
 
-            if (claim == null) {
+            if (Claim.getClaim(chunk).isEmpty()) {
                 hologramHandler.deleteHologram(hologramId);
                 removedCount++;
             }
@@ -187,11 +183,11 @@ public class HologramManager {
 
     public void createHologram(Location location) {
         Chunk chunk = location.getChunk();
-        Claim claim = Claim.getClaim(chunk);
-        if (claim == null) return;
+        Optional<Claim> claim = Claim.getClaim(chunk);
+        if (claim.isEmpty()) return;
 
         String hologramId = getHologramId(chunk);
-        List<String> lines = generateHologramLines(claim);
+        List<String> lines = generateHologramLines(claim.get());
         Location adjustedLocation = getCenteredLocation(location.clone(), lines.size());
 
         deleteHologram(chunk);

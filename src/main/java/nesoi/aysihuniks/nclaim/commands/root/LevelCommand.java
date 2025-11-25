@@ -9,6 +9,8 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.nandayo.dapi.message.ChannelType;
 
+import java.util.Optional;
+
 public class LevelCommand extends BaseCommand {
 
     @Override
@@ -28,14 +30,14 @@ public class LevelCommand extends BaseCommand {
             return true;
         }
 
-        Claim claim = Claim.getClaim(player.getLocation().getChunk());
+        Optional<Claim> claim = Claim.getClaim(player.getLocation().getChunk());
 
-        if (claim == null) {
+        if (claim.isEmpty()) {
             ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.not_in_claim"));
             return true;
         }
 
-        if (!claim.getOwner().equals(player.getUniqueId()) && !player.hasPermission("nclaim.admin")) {
+        if (!claim.get().getOwner().equals(player.getUniqueId()) && !player.hasPermission("nclaim.admin")) {
             ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("claim.not_yours"));
             return true;
         }
@@ -43,7 +45,7 @@ public class LevelCommand extends BaseCommand {
         NClaim.inst().getBlockValueManager().requestClaimCalculation(
                 player.getUniqueId(),
                 player.getName(),
-                claim
+                claim.get()
         );
 
         return true;

@@ -128,7 +128,7 @@ public class LandExpansionMenu extends BaseMenu {
 
     private void addChunkButton(InventorySlot slot, Player player) {
         Chunk thatChunk = findChunkFromSlot(slot);
-        Claim thatClaim = Claim.getClaim(thatChunk);
+        Optional<Claim> thatClaim = Claim.getClaim(thatChunk);
 
         String configPath;
 
@@ -136,12 +136,12 @@ public class LandExpansionMenu extends BaseMenu {
 
         if (!this.claim.isChunkAdjacent(thatChunk) && !admin) {
             configPath = "not_adjacent";
-        } else if (thatClaim == null) {
+        } else if (thatClaim.isEmpty()) {
             configPath = "expand";
             purchasable = true;
         } else if (claim.getLands().contains(NClaim.serializeChunk(thatChunk))) {
             configPath = "claimed";
-        } else if (claim == thatClaim) {
+        } else if (claim == thatClaim.get()) {
             configPath = "center";
         } else {
             configPath = "claimed_another_player";

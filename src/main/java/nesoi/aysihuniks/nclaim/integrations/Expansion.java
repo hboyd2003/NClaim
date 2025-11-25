@@ -16,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.text.ParseException;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -241,10 +242,10 @@ public class Expansion extends PlaceholderExpansion {
 
 
         Chunk chunk = world.getChunkAt(chunkX, chunkZ);
-        Claim claim = Claim.getClaim(chunk);
-        if (claim == null) throw new IllegalArgumentException("Claim not found");
+        Optional<Claim> claim = Claim.getClaim(chunk);
+        if (claim.isEmpty()) throw new IllegalArgumentException("Claim not found");
 
-        return claim;
+        return claim.get();
     }
 
     private @NotNull String handleClaimCount(String params, Player player) {
@@ -281,22 +282,19 @@ public class Expansion extends PlaceholderExpansion {
     private @Nullable String handleCurrentChunkOwner(Player player) {
         if (player == null) return null;
         Chunk chunk = player.getLocation().getChunk();
-        Claim claim = Claim.getClaim(chunk);
-        if (claim == null) {
-            return NClaim.inst().getLangManager().getString("claim.no_owner");
-        }
-        OfflinePlayer owner = Bukkit.getOfflinePlayer(claim.getOwner());
-        return owner.getName() != null ? NClaim.inst().getLangManager().getString("claim.owner").replace("{owner}", owner.getName()) : NClaim.inst().getLangManager().getString("claim.no_owner");
+        Optional<Claim> claim = Claim.getClaim(chunk);
+        if (claim.isEmpty()) return NClaim.inst().getLangManager().getString("claim.no_owner");
+        OfflinePlayer owner = Bukkit.getOfflinePlayer(claim.get().getOwner());
+        return owner.getName() != null ? NClaim.inst().getLangManager().getString("claim.owner")
+                .replace("{owner}", owner.getName()) : NClaim.inst().getLangManager().getString("claim.no_owner");
     }
 
     private String handleCurrentChunkName(Player player) {
         if (player == null) return null;
         Chunk chunk = player.getLocation().getChunk();
-        Claim claim = Claim.getClaim(chunk);
-        if (claim == null) {
-            return NClaim.inst().getLangManager().getString("claim.no_name");
-        }
-
-        return NClaim.inst().getLangManager().getString("claim.name").replace("{claim_name}", claim.getClaimName());
+        return Claim.getClaim(chunk)
+                .map(value -> NClaim.inst().getLangManager().getString("claim.name")
+                        .replace("{claim_name}", value.getClaimName()))
+                .orElseGet(() -> NClaim.inst().getLangManager().getString("claim.no_name"));
     }
 }

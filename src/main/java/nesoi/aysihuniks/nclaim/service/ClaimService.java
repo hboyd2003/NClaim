@@ -68,8 +68,7 @@ public class ClaimService {
 
         lastClaimTime.put(player.getUniqueId(), now);
 
-
-        plugin.getDatabaseManager().saveClaim(Claim.getClaim(chunk));
+        plugin.getDatabaseManager().saveClaim(Claim.getClaim(chunk).get());
         plugin.getDatabaseManager().saveUser(user);
 
     }
@@ -91,7 +90,7 @@ public class ClaimService {
             return;
         }
 
-        if (Claim.getClaim(chunk) != null) {
+        if (Claim.getClaim(chunk).isPresent()) {
             ChannelType.CHAT.send(player, plugin.getLangManager().getString("claim.already_claimed"));
             return;
         }
@@ -154,7 +153,7 @@ public class ClaimService {
             }
         }
 
-        if (Claim.getClaim(chunk) != null) {
+        if (Claim.getClaim(chunk).isPresent()) {
             ChannelType.CHAT.send(player, plugin.getLangManager().getString("claim.already_claimed"));
             return false;
         }
@@ -194,12 +193,12 @@ public class ClaimService {
                 }
 
                 Chunk nearbyChunk = chunk.getWorld().getChunkAt(x, z);
-                Claim nearbyClaim = Claim.getClaim(nearbyChunk);
+                Optional<Claim> nearbyClaim = Claim.getClaim(nearbyChunk);
 
-                if (nearbyClaim != null) {
-                    if (coopBypass && nearbyClaim.getCoopPlayers().contains(player.getUniqueId())) continue;
+                if (nearbyClaim.isPresent()) {
+                    if (coopBypass && nearbyClaim.get().getCoopPlayers().contains(player.getUniqueId())) continue;
 
-                    if (!nearbyClaim.getOwner().equals(player.getUniqueId())) {
+                    if (!nearbyClaim.get().getOwner().equals(player.getUniqueId())) {
                         return true;
                     }
                 }

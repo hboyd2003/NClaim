@@ -13,6 +13,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.nandayo.dapi.message.ChannelType;
 
+import java.util.Optional;
+
 public class SSpawner implements Listener {
 
     private final NClaim plugin;
@@ -44,9 +46,9 @@ public class SSpawner implements Listener {
 
     private boolean checkSpawnerPermission(Player player, Location location, Permission permission) {
         Chunk chunk = location.getChunk();
-        Claim claim = Claim.getClaim(chunk);
-        if (claim != null) {
-            if (!plugin.getClaimCoopManager().hasPermission(player, claim, permission)) {
+        Optional<Claim> claim = Claim.getClaim(chunk);
+        if (claim.isPresent()) {
+            if (!plugin.getClaimCoopManager().hasPermission(player, claim.get(), permission)) {
                 ChannelType.CHAT.send(player, plugin.getLangManager().getString("command.permission_denied"));
                 return true;
             }

@@ -18,24 +18,25 @@ public class GeikFarmer extends Integrations {
 
     @Override
     public UUID getOwnerUUID(String regionId) {
-        for (Claim claims : Claim.getClaims()) {
-            if (claims.getRegionID().equals(regionId)) {
-                return claims.getOwner();
-            }
-        }
-        return null;
+        return Claim.getClaims().stream()
+                .filter(claim -> claim.getRegionID().equals(regionId))
+                .findFirst()
+                .map(Claim::getOwner)
+                .orElse(null);
     }
 
     @Override
     public UUID getOwnerUUID(Location location) {
-        Claim claim = Claim.getClaim(location.getChunk());
-        return claim != null ? claim.getOwner() : null;
+        return Claim.getClaim(location.getChunk())
+                .map(Claim::getOwner)
+                .orElse(null);
     }
 
     @Override
     public String getRegionID(Location location) {
-        Claim claim = Claim.getClaim(location.getChunk());
-        return claim != null ? claim.getRegionID() : null;
+        return Claim.getClaim(location.getChunk())
+                .map(Claim::getRegionID)
+                .orElse(null);
     }
 
 

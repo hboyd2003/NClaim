@@ -30,10 +30,12 @@ public class AxSellWand implements Listener {
         Material type = targetBlock.getType();
         if (type != Material.CHEST && type != Material.TRAPPED_CHEST) return;
 
-        Claim claim = Claim.getClaim(targetBlock.getChunk());
-        if (claim != null && !claim.getOwner().equals(player.getUniqueId())) {
-            event.setCancelled(true);
-            ChannelType.CHAT.send(player, plugin.getLangManager().getString("command.permission_denied"));
-        }
+        Claim.getClaim(targetBlock.getChunk())
+                .ifPresent(claim -> {
+                    if (!claim.getOwner().equals(player.getUniqueId())) {
+                        event.setCancelled(true);
+                        ChannelType.CHAT.send(player, plugin.getLangManager().getString("command.permission_denied"));
+                    }
+                });
     }
 }

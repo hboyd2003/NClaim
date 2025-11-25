@@ -131,10 +131,10 @@ public class Claim {
     @Getter
     static public Collection<Claim> claims = new ArrayList<>();
 
-    static public Claim getClaim(@NotNull Chunk chunk) {
+    static public Optional<Claim> getClaim(@NotNull Chunk chunk) {
         return claims.stream()
                 .filter(c -> c.getChunk().equals(chunk) || c.getLands().contains(chunk.getWorld().getName() +  "," + chunk.getX() + "," + chunk.getZ()))
-                .findFirst().orElse(null);
+                .findFirst();
     }
 
     private volatile boolean isBeingRemoved = false;
