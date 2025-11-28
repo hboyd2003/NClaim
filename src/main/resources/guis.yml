@@ -547,7 +547,7 @@ guis:
           - "&7Status: {status}"
           - ""
           - "&eClick to toggle"
-      tnt_explosions:
+      tnt_destruction:
         default_value: true
         changeable: true
         # permission: "nclaim.change_tnt_explosion_setting"
@@ -560,15 +560,63 @@ guis:
           - "&7Status: {status}"
           - ""
           - "&eClick to toggle"
-      creeper_explosions:
+      creeper_griefing:
         default_value: true
         changeable: true
         # permission: "nclaim.change_claim_creeper_explosion_setting"
-        display_name: "&6Creeper Damage"
+        display_name: "&6Creeper Griefing"
         material: "CREEPER_SPAWN_EGG"
         lore:
           - ""
-          - "&fAllow Creeper explosion damage"
+          - "&fAllow Creeper griefing"
+          - ""
+          - "&7Status: {status}"
+          - ""
+          - "&eClick to toggle"
+      zombie_griefing:
+        default_value: true
+        changeable: true
+        display_name: "&6Zombie Griefing"
+        material: "ZOMBIE_SPAWN_EGG"
+        lore:
+          - ""
+          - "&fAllow Zombie griefing"
+          - ""
+          - "&7Status: {status}"
+          - ""
+          - "&eClick to toggle"
+      enderman_griefing:
+        default_value: true
+        changeable: true
+        display_name: "&6Enderman Griefing"
+        material: "ENDERMAN_SPAWN_EGG"
+        lore:
+          - ""
+          - "&fAllow Enderman griefing"
+          - ""
+          - "&7Status: {status}"
+          - ""
+          - "&eClick to toggle"
+      silverfish_griefing:
+        default_value: true
+        changeable: true
+        display_name: "&6Silverfish Griefing"
+        material: "SILVERFISH_SPAWN_EGG"
+        lore:
+          - ""
+          - "&fAllow Silverfish griefing"
+          - ""
+          - "&7Status: {status}"
+          - ""
+          - "&eClick to toggle"
+      ghast_griefing:
+        default_value: true
+        changeable: true
+        display_name: "&6Ghast Griefing"
+        material: "GHAST_SPAWN_EGG"
+        lore:
+          - ""
+          - "&fAllow Ghast griefing"
           - ""
           - "&7Status: {status}"
           - ""
@@ -581,7 +629,7 @@ guis:
         material: "GOLDEN_APPLE"
         lore:
           - ""
-          - "&fAllow players to fight mobs"
+          - "&fAllow non-claim players to fight mobs"
           - ""
           - "&7Status: {status}"
           - ""

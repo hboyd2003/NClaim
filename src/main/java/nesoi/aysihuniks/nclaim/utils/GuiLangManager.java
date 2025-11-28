@@ -129,8 +129,12 @@ public class GuiLangManager {
     private Setting getSettingByKey(String key) {
         return switch (key) {
             case "pvp" -> Setting.CLAIM_PVP;
-            case "tnt_explosions" -> Setting.TNT_DAMAGE;
-            case "creeper_explosions" -> Setting.CREEPER_DAMAGE;
+            case "tnt_destruction" -> Setting.TNT_DESTRUCTION;
+            case "creeper_griefing" -> Setting.CREEPER_GRIEFING;
+            case "zombie_griefing" -> Setting.ZOMBIE_GRIEFING;
+            case "enderman_griefing" -> Setting.ENDERMAN_GRIEFING;
+            case "silverfish_griefing" -> Setting.SILVERFISH_GRIEFING;
+            case "ghast_griefing" -> Setting.GHAST_GRIEFING;
             case "mob_attacks" -> Setting.MOB_ATTACKING;
             case "monster_spawning" -> Setting.MONSTER_SPAWNING;
             case "animal_spawning" -> Setting.ANIMAL_SPAWNING;

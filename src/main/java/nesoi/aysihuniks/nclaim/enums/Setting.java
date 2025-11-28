@@ -2,8 +2,12 @@ package nesoi.aysihuniks.nclaim.enums;
 
 public enum Setting {
     CLAIM_PVP,
-    TNT_DAMAGE,
-    CREEPER_DAMAGE,
+    TNT_DESTRUCTION,
+    CREEPER_GRIEFING,
+    ZOMBIE_GRIEFING,
+    ENDERMAN_GRIEFING,
+    SILVERFISH_GRIEFING,
+    GHAST_GRIEFING,
     MOB_ATTACKING,
     MONSTER_SPAWNING,
     ANIMAL_SPAWNING,

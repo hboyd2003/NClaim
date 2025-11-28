@@ -119,9 +119,10 @@ public class ClaimManager implements Listener {
         if (explodeClaim.isEmpty()) return;
 
         Setting setting = switch (event.getEntity()) {
-            case TNTPrimed ignored -> Setting.TNT_DAMAGE;
-            case ExplosiveMinecart ignored -> Setting.TNT_DAMAGE;
-            case Creeper ignored -> Setting.CREEPER_DAMAGE;
+            case TNTPrimed ignored -> Setting.TNT_DESTRUCTION;
+            case ExplosiveMinecart ignored -> Setting.TNT_DESTRUCTION;
+            case Creeper ignored -> Setting.CREEPER_GRIEFING;
+            case Fireball ignored -> Setting.GHAST_GRIEFING;
             default -> null;
         };
         if (setting == null) return;
@@ -130,6 +131,22 @@ public class ClaimManager implements Listener {
             Optional<Claim> blockClaim = Claim.getClaim(block.getChunk());
             return blockClaim.isPresent() && !plugin.getClaimSettingsManager().isSettingEnabled(blockClaim.get(), setting);
         });
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onEntityChangeBlockEvent(EntityChangeBlockEvent event) {
+        Optional<Claim> claim = Claim.getClaim(event.getBlock().getChunk());
+        if (claim.isEmpty()) return;
+
+        Setting setting = switch (event.getEntity().getType()) {
+            case ENDERMAN -> Setting.ENDERMAN_GRIEFING;
+            case SILVERFISH ->  Setting.SILVERFISH_GRIEFING;
+            case ZOMBIE ->  Setting.ZOMBIE_GRIEFING;
+            default -> null;
+        };
+        if (setting == null) return;
+
+        event.setCancelled(!claim.get().getSettings().isEnabled(setting));
     }
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -201,26 +218,28 @@ public class ClaimManager implements Listener {
         }
 
         // Player removes item from item frame
-        if (damaged instanceof ItemFrame) {
-            if (!(damager instanceof Player damagerPlayer)) return;
-
+        if (damaged instanceof ItemFrame
+                && damager instanceof Player damagerPlayer) {
             if (cancelIfNotClaimMember(damagerPlayer, claim.get(), event)) return;
 
             cancelIfNoPermission(damagerPlayer, claim.get(), Permission.INTERACT_ITEM_FRAME, event, "interact");
         }
 
-        // Player breaks an entity block
-        if (damaged instanceof Painting || damaged instanceof ArmorStand) {
-            if (!(damager instanceof Player damagerPlayer)) return;
+        // Damage to non-player entity
+        if (damager instanceof Player damagerPlayer
+                && (damaged instanceof ArmorStand
+                    || damaged instanceof Painting
+                    || damaged instanceof ItemFrame
+                    || damaged instanceof Boat)) {
 
             if (cancelIfNotClaimMember(damagerPlayer, claim.get(), event)) return;
-
             cancelIfNoPermission(damagerPlayer, claim.get(), Permission.BREAK_BLOCKS, event, "interact");
+            return;
         }
 
         boolean mobAttackingEnabled = plugin.getClaimSettingsManager().isSettingEnabled(claim.get(), Setting.MOB_ATTACKING);
 
-        // Player damaging monster
+        // Monster damaging player
         if (damaged instanceof Player damagedPlayer
                 && damager instanceof Monster
                 && !mobAttackingEnabled
@@ -229,7 +248,7 @@ public class ClaimManager implements Listener {
             return;
         }
 
-        // Monster damaging player
+        // Player damaging monster
         if (damaged instanceof Monster
                 && damager instanceof Player damagerPlayer
                 && !hasClaimBypass(damagerPlayer, "mob_attacking")
@@ -244,9 +263,10 @@ public class ClaimManager implements Listener {
                 || damaged instanceof ItemFrame
                 || damaged instanceof Painting) {
             Setting setting = switch (damager) {
-                case TNTPrimed ignored -> Setting.TNT_DAMAGE;
-                case ExplosiveMinecart ignored -> Setting.TNT_DAMAGE;
-                case Creeper ignored -> Setting.CREEPER_DAMAGE;
+                case TNTPrimed ignored -> Setting.TNT_DESTRUCTION;
+                case ExplosiveMinecart ignored -> Setting.TNT_DESTRUCTION;
+                case Creeper ignored -> Setting.CREEPER_GRIEFING;
+                case Fireball ignored -> Setting.GHAST_GRIEFING;
                 case null, default -> null;
             };
             if (setting == null) return;

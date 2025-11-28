@@ -8,8 +8,12 @@ public class ClaimSetting {
 
     public final HashMap<Setting, Boolean> settings = new HashMap<>() {{
         put(Setting.CLAIM_PVP, false);
-        put(Setting.TNT_DAMAGE, true);
-        put(Setting.CREEPER_DAMAGE, true);
+        put(Setting.TNT_DESTRUCTION, true);
+        put(Setting.CREEPER_GRIEFING, true);
+        put(Setting.ZOMBIE_GRIEFING, true);
+        put(Setting.ENDERMAN_GRIEFING, true);
+        put(Setting.SILVERFISH_GRIEFING, true);
+        put(Setting.GHAST_GRIEFING, true);
         put(Setting.MOB_ATTACKING, false);
         put(Setting.MONSTER_SPAWNING, true);
         put(Setting.ANIMAL_SPAWNING, true);

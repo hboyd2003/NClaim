@@ -35,8 +35,12 @@ public class ClaimSettingsMenu extends BaseMenu {
 
     private final List<SettingData> settings = Arrays.asList(
             new SettingData(Setting.CLAIM_PVP, "pvp", getMaterial("settings.pvp")),
-            new SettingData(Setting.TNT_DAMAGE, "tnt_explosions", getMaterial("settings.tnt_explosions")),
-            new SettingData(Setting.CREEPER_DAMAGE, "creeper_explosions", getMaterial("settings.creeper_explosions")),
+            new SettingData(Setting.TNT_DESTRUCTION, "tnt_destruction", getMaterial("settings.tnt_destruction")),
+            new SettingData(Setting.CREEPER_GRIEFING, "creeper_griefing", getMaterial("settings.creeper_griefing")),
+            new SettingData(Setting.ZOMBIE_GRIEFING, "zombie_griefing", getMaterial("settings.zombie_griefing")),
+            new SettingData(Setting.ENDERMAN_GRIEFING, "enderman_griefing", getMaterial("settings.enderman_griefing")),
+            new SettingData(Setting.SILVERFISH_GRIEFING, "silverfish_griefing", getMaterial("settings.silverfish_griefing")),
+            new SettingData(Setting.GHAST_GRIEFING, "ghast_griefing", getMaterial("settings.ghast_griefing")),
             new SettingData(Setting.MOB_ATTACKING, "mob_attacks", getMaterial("settings.mob_attacks")),
             new SettingData(Setting.MONSTER_SPAWNING, "monster_spawning", getMaterial("settings.monster_spawning")),
             new SettingData(Setting.ANIMAL_SPAWNING, "animal_spawning", getMaterial("settings.animal_spawning")),
