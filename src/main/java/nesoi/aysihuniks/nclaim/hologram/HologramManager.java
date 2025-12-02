@@ -3,6 +3,7 @@ package nesoi.aysihuniks.nclaim.hologram;
 import nesoi.aysihuniks.nclaim.Config;
 import nesoi.aysihuniks.nclaim.NClaim;
 import nesoi.aysihuniks.nclaim.enums.HoloEnum;
+    import nesoi.aysihuniks.nclaim.enums.Setting;
 import nesoi.aysihuniks.nclaim.model.Claim;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -119,7 +120,7 @@ public class HologramManager {
             if (claim.getChunk().getWorld().getName().equals(worldName)) {
                 String hologramId = getHologramId(claim.getChunk());
 
-                if (hologramExists(hologramId)) {
+                if (hologramExists(hologramId) && claim.getSettings().isEnabled(Setting.SHOW_HOLOGRAM)) {
                     createHologramForClaim(claim);
                     created++;
                 }
@@ -138,7 +139,7 @@ public class HologramManager {
         for (Claim claim : Claim.claims) {
             String hologramId = getHologramId(claim.getChunk());
 
-            if (hologramExists(hologramId)) {
+            if (hologramExists(hologramId) &&  claim.getSettings().isEnabled(Setting.SHOW_HOLOGRAM)) {
                 createHologramForClaim(claim);
                 created++;
             }
