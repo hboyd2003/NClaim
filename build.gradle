@@ -3,10 +3,11 @@ plugins {
     id 'maven-publish'
     id("com.gradleup.shadow") version "9.2.2"
     id("xyz.jpenilla.run-paper") version "2.3.1"
+    //id("io.papermc.paperweight.userdev") version "2.0.0-beta.19"
 }
 
 group = 'nesoi.aysihuniks'
-version = '4.0-prsmo'
+version = '4.1-prsmo'
 description = 'NClaim'
 
 repositories {
@@ -72,7 +73,6 @@ repositories {
         url = "https://repo.papermc.io/repository/maven-public/"
     }
 
-
     maven {
         name = "codemc-creatorfromhell"
         url = "https://repo.codemc.io/repository/creatorfromhell/"
@@ -86,6 +86,7 @@ repositories {
 
 dependencies {
     compileOnly("com.google.guava:guava:33.3.1-jre")
+    //paperweight.paperDevBundle("1.21.8-R0.1-SNAPSHOT")
     compileOnly(libs.paperApi)
     compileOnly(libs.lombok)
     annotationProcessor(libs.lombok)
@@ -132,6 +133,9 @@ java {
     if (JavaVersion.current() < javaVersion) {
         toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
     }
+
+    withJavadocJar()
+    withSourcesJar()
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -152,9 +156,21 @@ processResources {
 }
 
 publishing {
+    repositories() {
+        maven {
+            credentials {
+                setUsername(System.getenv("MAVEN_USERNAME"))
+                setPassword(System.getenv("MAVEN_PASSWORD"))
+            }
+
+            setName("hboyd-dev-repo")
+            setUrl("https://repo.hboyd.dev/" + (version.contains("SNAPSHOT") ? "snapshots/" : "releases/"))
+        }
+    }
+
     publications {
-        maven(MavenPublication) {
-            from(components.java)
+        mavenJava(MavenPublication) {
+            from components.java
         }
     }
 }
