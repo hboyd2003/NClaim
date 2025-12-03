@@ -162,12 +162,23 @@ guis:
       lore:
         - ""
         - "&fThis is your claim's center chunk"
+    visualize_claim:
+      display_name: "&fVisualize Claim"
+      material: "ENDER_EYE"
+      lore:
+        - ""
+        - "&fShows particles outlining your claim for 20s"
+        - "&fYou must have end-rod particles enabled to see the outline"
+        - ""
+        - "&eClick to visualize your claim boundaries"
     center_at_chunk:
       display_name: "&6Center Chunk &7- &eYou are here"
       material: BEACON
       lore:
         - ""
         - "&fThis is your claim's center chunk"
+        - ""
+        - "&eRight-click to visualize chunk"
     expand:
       display_name: "&6Expand Claim"
       material: "BROWN_WOOL"
@@ -177,6 +188,7 @@ guis:
         - "&7Cost: &e${price}"
         - ""
         - "&eClick to purchase"
+        - "&7Right-click to visualize chunk"
     expand_at_chunk:
       display_name: "&6Expand Claim &7- &eYou are here"
       material: "PLAYER_HEAD"
@@ -186,41 +198,54 @@ guis:
         - "&7Cost: &e${price}"
         - ""
         - "&eClick to purchase"
+        - "&7Right-click to visualize chunk"
     claimed:
       display_name: "&aClaimed Chunk"
       material: "GREEN_WOOL"
       lore:
         - ""
         - "&fThis chunk is claimed"
+        - ""
+        - "&eRight-click to visualize chunk"
     claimed_at_chunk:
       display_name: "&aClaimed Chunk &7- &eYou are here"
       material: "PLAYER_HEAD"
       lore:
         - ""
         - "&fThis chunk is claimed"
+        - ""
+        - "&eRight-click to visualize chunk"
     not_adjacent:
       display_name: "&cInvalid Chunk"
       material: "BLACK_WOOL"
       lore:
         - ""
         - "&fYou can only claim adjacent chunks"
+        - ""
+        - "&eRight-click to visualize chunk"
     not_adjacent_at_chunk:
       display_name: "&cInvalid Chunk &7- &eYou are here"
       material: "PLAYER_HEAD"
       lore:
         - "&fYou can only claim adjacent chunks"
+        - ""
+        - "&eRight-click to visualize chunk"
     claimed_another_player:
       display_name: "&cClaimed by Another Player"
       material: "RED_WOOL"
       lore:
         - ""
         - "&fThis chunk belongs to someone else"
+        - ""
+        - "&eRight-click to visualize chunk"
     claimed_another_player_at_chunk:
       display_name: "&cClaimed by Another Player &7- &eYou are here"
       material: "PLAYER_HEAD"
       lore:
         - ""
         - "&fThis chunk belongs to someone else"
+        - ""
+        - "&eRight-click to visualize chunk"
 
   # Claim Time Management Menu - The menu that opens after interacting with the claim block and clicking the 'Manage Expiration' button.
   claim_time_management_menu:

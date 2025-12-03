@@ -423,6 +423,7 @@ public class Claim {
             case NORTH -> farthestChunk.getZ() > chunk.getZ();
             case EAST -> farthestChunk.getX() < chunk.getX();
             case WEST -> farthestChunk.getX() > chunk.getX();
+            default -> throw new IllegalArgumentException("Direction must be cardinal: " + direction);
         };
 
         Chunk farthestChunk = chunks.iterator().next();
@@ -431,6 +432,30 @@ public class Claim {
         }
 
         return farthestChunk;
+    }
+
+    public Map<Chunk, Collection<Direction>> getEdgeChunkDirections() {
+        Map<Chunk, Collection<Direction>> edgeChunkDirections = new HashMap<>();
+        for (Chunk chunk : getAllChunks()) {
+            Collection<Direction> edgeDirections = getEdgeDirection(chunk);
+            if (!edgeDirections.isEmpty())
+                edgeChunkDirections.put(chunk, edgeDirections);
+        }
+
+        return edgeChunkDirections;
+    }
+
+    private Collection<Direction> getEdgeDirection(Chunk chunk) {
+        Collection<Direction> directions = new ArrayList<>();
+        World world = chunk.getWorld();
+
+        for (Direction direction : Direction.getCardinalDirections()) {
+            Chunk edgeChunk = world.getChunkAt(chunk.getX() + direction.x(), chunk.getZ() + direction.z());
+            Optional<Claim> claim = getClaim(edgeChunk);
+
+            if (claim.isEmpty() || (!claim.get().equals(this))) directions.add(direction);
+        }
+        return directions;
     }
 
     public boolean isChunkAdjacent(Chunk targetChunk) {

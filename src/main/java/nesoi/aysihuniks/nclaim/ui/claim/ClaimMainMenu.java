@@ -72,7 +72,7 @@ public class ClaimMainMenu extends BaseMenu {
                 if (clickType == ClickType.LEFT) {
                     handleBuyClaimClick(player);
                 } else if(clickType == ClickType.RIGHT) {
-                    NClaim.inst().getClaimVisualizerService().showClaimBorders(player);
+                    NClaim.inst().getClaimVisualizerService().showChunkBorders(player);
                 }
 
             }

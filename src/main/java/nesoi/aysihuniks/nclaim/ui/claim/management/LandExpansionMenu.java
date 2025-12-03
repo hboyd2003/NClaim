@@ -23,7 +23,6 @@ import org.nandayo.dapi.guimanager.MenuType;
 import org.nandayo.dapi.guimanager.button.Button;
 import org.nandayo.dapi.guimanager.button.SingleSlotButton;
 import org.nandayo.dapi.util.ItemCreator;
-import org.nandayo.dapi.util.Util;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -65,7 +64,7 @@ public class LandExpansionMenu extends BaseMenu {
 
     private void setupMenu(Player player) {
         createInventory(MenuType.CHEST_6_ROWS, getString("title").replace("{claim_name}", claim.getClaimName()));
-
+        // Back button
         addButton(new Button() {
             @Override
             public @NotNull Set<Integer> getSlots() {
@@ -86,6 +85,31 @@ public class LandExpansionMenu extends BaseMenu {
             }
         });
 
+        // Visualize claim
+        addButton(new Button() {
+            @Override
+            public @NotNull Set<Integer> getSlots() {
+                return Sets.newHashSet(new InventorySlot(5, 8).asSlot());
+            }
+
+            @Override
+            public ItemStack getItem() {
+                return ItemCreator.of(getMaterial("visualize_claim"))
+                        .name(getString("visualize_claim.display_name"))
+                        .lore(getStringList("visualize_claim.lore"))
+                        .get();
+            }
+
+            @Override
+            public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
+                if (clickType.isRightClick()) return;
+
+                player.closeInventory();
+                NClaim.inst().getClaimVisualizerService().showClaimBorders(player, claim);
+            }
+        });
+
+        // Scroll buttons
         for(ScrollButton scrollButton : ScrollButton.values()) {
             addButton(new Button() {
                 @Override
@@ -205,7 +229,7 @@ public class LandExpansionMenu extends BaseMenu {
                             onFinish);
                 } else if (clickType.isRightClick()) {
                     player.closeInventory();
-                    NClaim.inst().getClaimVisualizerService().showClaimBorders(player, thatChunk);
+                    NClaim.inst().getClaimVisualizerService().showChunkBorders(player, thatChunk);
                 }
             }
         };
@@ -236,6 +260,7 @@ public class LandExpansionMenu extends BaseMenu {
             case SOUTH -> distance.z() > centerSlot.getRow();
             case EAST -> distance.x() >= centerSlot.getColumn();
             case WEST -> distance.x() >= 8 - centerSlot.getColumn();
+            default -> throw new IllegalArgumentException("Direction must be cardinal: " + direction);
         };
     }
 

@@ -17,6 +17,6 @@ public record Coordinate2D(int x, int z) {
     }
 
     public Coordinate2D offsetInDirection(Direction direction, int offset) {
-        return new Coordinate2D(x + (direction.getX() * offset), z + (direction.getZ() * offset));
+        return new Coordinate2D(x + (direction.x() * offset), z + (direction.z() * offset));
     }
 }
