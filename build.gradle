@@ -7,7 +7,7 @@ plugins {
 }
 
 group = 'nesoi.aysihuniks'
-version = '4.1-prsmo'
+version = '4.2-prsmo'
 description = 'NClaim'
 
 repositories {
