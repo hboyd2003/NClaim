@@ -25,6 +25,7 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.*;
 import java.util.function.BiPredicate;
 
@@ -316,25 +317,30 @@ public class Claim {
             oldOwnerUser = User.getUser(oldOwner);
         }
 
-        if (oldOwnerUser != null) {
-            oldOwnerUser.getPlayerClaims().remove(this);
-            User.saveUser(oldOwner);
-        }
-
-        owner = newOwner;
-
         User newOwnerUser = User.getUser(newOwner);
         if (newOwnerUser == null) {
             User.loadUser(newOwner);
             newOwnerUser = User.getUser(newOwner);
         }
 
-        if (newOwnerUser != null) {
-            newOwnerUser.getPlayerClaims().add(this);
-            User.saveUser(newOwner);
-        }
+        if (oldOwnerUser == null) throw new NullPointerException("Current owner user was null");
+        if (newOwnerUser == null) throw new NullPointerException("New owner user was null");
 
+        newOwnerUser.getCoopClaims().remove(this);
         getCoopPlayers().remove(newOwner);
+        coopPermissions.remove(newOwner);
+        coopPlayerJoinDate.remove(newOwner);
+        newOwnerUser.getPlayerClaims().add(this);
+        User.saveUser(newOwner);
+
+        oldOwnerUser.getCoopClaims().add(this);
+        getCoopPlayers().add(oldOwner);
+        coopPermissions.put(oldOwner, new CoopPermission());
+        coopPlayerJoinDate.put(oldOwner, Date.from(Instant.now()));
+        oldOwnerUser.getPlayerClaims().remove(this);
+        User.saveUser(oldOwner);
+
+        owner = newOwner;
 
         plugin.getDatabaseManager().saveClaim(this);
     }
