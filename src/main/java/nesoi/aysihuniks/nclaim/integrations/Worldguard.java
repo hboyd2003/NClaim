@@ -27,9 +27,9 @@ public class Worldguard {
         if (regions.isPresent()) {
             for (ProtectedRegion region : regions.get()) {
                 if (NClaim.inst().getNconfig().getBlacklistedRegions().contains(region.getId()))
-                    return false;
+                    return true;
             }
         }
-        return true;
+        return false;
     }
 }
