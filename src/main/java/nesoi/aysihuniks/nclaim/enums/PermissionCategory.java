@@ -14,7 +14,7 @@ public enum PermissionCategory {
             
     CONTAINERS("Container Permissions",
             Permission.USE_CHEST, Permission.USE_TRAPPED_CHEST, Permission.USE_FURNACE,
-            Permission.USE_BARREL, Permission.USE_SHULKER,
+            Permission.USE_SMOKER, Permission.USE_BARREL, Permission.USE_SHULKER,
             Permission.USE_HOPPER, Permission.USE_DISPENSER, Permission.USE_DROPPER),
             
     REDSTONE("Redstone Permissions",

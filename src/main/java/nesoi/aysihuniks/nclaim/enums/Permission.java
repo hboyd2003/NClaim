@@ -9,6 +9,7 @@ public enum Permission {
     USE_CHEST("Use chests"),
     USE_TRAPPED_CHEST("Use trapped chests"),
     USE_FURNACE("Use furnaces"),
+    USE_SMOKER("Use smokers"),
     USE_BARREL("Use barrels"),
     USE_SHULKER("Use shulker boxes"),
     USE_HOPPER("Use hoppers"),

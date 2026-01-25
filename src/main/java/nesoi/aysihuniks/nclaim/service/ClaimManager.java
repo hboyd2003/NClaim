@@ -439,6 +439,8 @@ public class ClaimManager implements Listener {
             case SPAWNER -> Permission.PLACE_SPAWNER;
             case CHEST -> Permission.USE_CHEST;
             case TRAPPED_CHEST -> Permission.USE_TRAPPED_CHEST;
+            case FURNACE, FURNACE_MINECART, BLAST_FURNACE -> Permission.USE_FURNACE;
+            case SMOKER -> Permission.USE_SMOKER;
             case BARREL -> Permission.USE_BARREL;
             case SWEET_BERRY_BUSH -> Permission.PLACE_BLOCKS;
             case HOPPER -> Permission.USE_HOPPER;
