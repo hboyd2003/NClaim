@@ -617,11 +617,12 @@ public class ClaimManager implements Listener {
         Optional<Claim> sourceClaim = Claim.getClaim(block.getChunk());
         for (BlockFace face : BlockFace.values()) {
             Optional<Claim> targetClaim = Claim.getClaim(block.getRelative(face).getChunk());
+            // Block updates through claim boundaries that are not owned by the same player or is a co-op of
             if (targetClaim.isPresent()
                     && sourceClaim.isPresent()
                     && !targetClaim.get().getOwner().equals(sourceClaim.get().getOwner())
                     && !targetClaim.get().getCoopPlayers().contains(sourceClaim.get().getOwner())) {
-                event.setNewCurrent(event.getNewCurrent());
+                event.setNewCurrent(event.getOldCurrent());
                 return;
             }
         }
