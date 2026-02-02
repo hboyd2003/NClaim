@@ -554,18 +554,6 @@ public final class NClaim extends JavaPlugin {
         return centerX + "," + centerZ;
     }
 
-    static public String serializeChunk(@NotNull Chunk chunk) {
-        return chunk.getWorld().getName() + "," + chunk.getX() + "," + chunk.getZ();
-    }
-
-    static public Chunk deserializeChunk(@NotNull String chunk) {
-        String[] chunkParts = chunk.split(",");
-        if (chunkParts.length != 3) return null;
-        World world = Bukkit.getWorld(chunkParts[0]);
-        if (world == null) return null;
-        return world.getChunkAt(Integer.parseInt(chunkParts[1]), Integer.parseInt(chunkParts[2]));
-    }
-
     private void setupDatabase() {
         try {
             String dbType = nconfig.getDatabaseType().toLowerCase();

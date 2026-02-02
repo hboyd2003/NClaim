@@ -266,7 +266,10 @@ public class MySQLManager implements DatabaseManager {
             stmt.setString(7, claim.getOwner().toString());
             stmt.setString(8, NClaim.serializeLocation(claim.getClaimBlockLocation()));
             stmt.setString(9, claim.getClaimName());
-            stmt.setString(10, gson.toJson(claim.getLands()));
+            stmt.setString(10, claim.getClaimChunks().stream()
+                    .map(ClaimChunk::serialize)
+                    .map(l -> Long.toString(l))
+                    .collect(Collectors.joining(",")));
             stmt.setLong(11, claim.getClaimValue());
             stmt.setString(12, claim.getClaimBlockType().name());
 
@@ -417,8 +420,9 @@ public class MySQLManager implements DatabaseManager {
             }
         }
 
-        Type landType = new TypeToken<Collection<String>>(){}.getType();
-        Collection<String> lands = gson.fromJson(rs.getString("lands"), landType);
+        Collection<String> serializedClaimChunks = List.of(rs.getString("lands").split(","));
+        HashSet<ClaimChunk> claimChunks = new HashSet<>();
+        serializedClaimChunks.stream().map(Long::decode).map(ClaimChunk::deserialize).forEach(claimChunks::add);
 
         CoopData coopData = loadClaimCoops(conn, claimId);
         ClaimSetting settings = loadClaimSettings(conn, claimId);
@@ -433,7 +437,7 @@ public class MySQLManager implements DatabaseManager {
                 claimName,
                 claimValue,
                 claimBlockType,
-                lands,
+                claimChunks,
                 coopData.getCoopPlayers(),
                 coopData.getJoinDates(),
                 coopData.getPermissions(),

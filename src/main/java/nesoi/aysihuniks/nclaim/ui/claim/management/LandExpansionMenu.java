@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 import lombok.Getter;
 import nesoi.aysihuniks.nclaim.NClaim;
 import nesoi.aysihuniks.nclaim.enums.Direction;
+import nesoi.aysihuniks.nclaim.model.ClaimChunk;
 import nesoi.aysihuniks.nclaim.model.Coordinate2D;
 import nesoi.aysihuniks.nclaim.model.InventorySlot;
 import nesoi.aysihuniks.nclaim.ui.shared.BackgroundMenu;
@@ -163,7 +164,7 @@ public class LandExpansionMenu extends BaseMenu {
         } else if (thatClaim.isEmpty()) {
             configPath = "expand";
             purchasable = true;
-        } else if (claim.getLands().contains(NClaim.serializeChunk(thatChunk))) {
+        } else if (claim.getClaimChunks().contains(ClaimChunk.fromChunk(thatChunk))) {
             configPath = "claimed";
         } else if (claim == thatClaim.get()) {
             configPath = "center";
@@ -236,10 +237,7 @@ public class LandExpansionMenu extends BaseMenu {
     }
 
     private double calculateChunkPrice() {
-        int currentChunkCount = 1 + claim.getLands().size();
-        int nextChunkNumber = currentChunkCount + 1;
-
-        return NClaim.inst().getNconfig().getTieredPrice(nextChunkNumber);
+        return NClaim.inst().getNconfig().getTieredPrice(claim.size() + 1);
     }
 
     private Chunk findChunkFromSlot(InventorySlot slot) {

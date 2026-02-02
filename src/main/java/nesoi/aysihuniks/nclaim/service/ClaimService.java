@@ -79,8 +79,7 @@ public class ClaimService {
             return;
         }
 
-        String chunkKey = chunk.getWorld().getName() + "," + chunk.getX() + "," + chunk.getZ();
-        if (claim.getLands().contains(chunkKey)) {
+        if (claim.getClaimChunks().contains(ClaimChunk.fromChunk(chunk))) {
             ChannelType.CHAT.send(player, plugin.getLangManager().getString("claim.land.already_own_land"));
             return;
         }
@@ -117,8 +116,7 @@ public class ClaimService {
             }
         }
 
-        claim.getLands().add(chunkKey);
-
+        claim.getClaimChunks().add(ClaimChunk.fromChunk(chunk));
 
         plugin.getDatabaseManager().saveClaim(claim);
         plugin.getDatabaseManager().saveUser(user);
@@ -128,8 +126,7 @@ public class ClaimService {
     }
 
     public double calculateLandPrice(@NotNull Claim claim) {
-        int currentChunkCount = 1 + claim.getLands().size();
-        int nextChunkNumber = currentChunkCount + 1;
+        int nextChunkNumber = claim.size() + 1;
 
         if (nextChunkNumber > 41) {
             return -1;

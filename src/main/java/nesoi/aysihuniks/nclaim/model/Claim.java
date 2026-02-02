@@ -56,8 +56,8 @@ public class Claim {
                 claimName,
                 claimValue,
                 claimBlockType,
-                new ArrayList<>(),
-                new ArrayList<>(),
+                new HashSet<>(),
+                new HashSet<>(),
                 new HashMap<>(),
                 new HashMap<>(),
                 settings,
@@ -74,8 +74,8 @@ public class Claim {
             @NotNull String claimName,
             long claimValue,
             Material claimBlockType,
-            Collection<String> lands,
-            Collection<UUID> coopPlayers,
+            HashSet<ClaimChunk> claimChunks,
+            HashSet<UUID> coopPlayers,
             HashMap<UUID, Date> coopPlayerJoinDate,
             HashMap<UUID, CoopPermission> coopPermissions,
             ClaimSetting settings,
@@ -91,7 +91,7 @@ public class Claim {
         this.claimName = claimName;
         this.claimBlockType = claimBlockType;
         this.claimValue = claimValue;
-        this.lands = lands;
+        this.claimChunks = claimChunks;
         this.coopPlayers = coopPlayers;
         this.coopPlayerJoinDate = coopPlayerJoinDate;
         this.coopPermissions = coopPermissions;
@@ -113,8 +113,8 @@ public class Claim {
     private @NotNull String claimName;
     private long claimValue;
     private Material claimBlockType;
-    private final Collection<String> lands;
-    private final Collection<UUID> coopPlayers;
+    private final HashSet<ClaimChunk> claimChunks;
+    private final HashSet<UUID> coopPlayers;
     private final HashMap<UUID, Date> coopPlayerJoinDate;
 
     private final HashMap<UUID, CoopPermission> coopPermissions;
@@ -123,10 +123,10 @@ public class Claim {
 
 
     public Collection<Chunk> getAllChunks() {
-        List<Chunk> chunks = new ArrayList<>();
-        chunks.add(chunk);
-        getLands().forEach(l -> chunks.add(NClaim.deserializeChunk(l)));
-        return chunks;
+        HashSet<Chunk> result = new HashSet<>();
+        claimChunks.stream().map(c -> c.toChunk(chunk.getWorld())).forEach(result::add);
+        result.add(chunk);
+        return result;
     }
 
     @Getter
@@ -134,8 +134,8 @@ public class Claim {
 
     static public Optional<Claim> getClaim(@NotNull Chunk chunk) {
         return claims.stream()
-                .filter(c -> c.getChunk().equals(chunk) || c.getLands().contains(chunk.getWorld().getName() +  "," + chunk.getX() + "," + chunk.getZ()))
-                .findFirst();
+                .filter(c -> c.getChunk().equals(chunk) || c.getClaimChunks().contains(ClaimChunk.fromChunk(chunk)))
+                .findAny();
     }
 
     private volatile boolean isBeingRemoved = false;
@@ -464,28 +464,20 @@ public class Claim {
         return directions;
     }
 
-    public boolean isChunkAdjacent(Chunk targetChunk) {
-        Coordinate2D claimCoords = Coordinate2D.ofChunk(chunk);
-        Coordinate2D targetCoords = Coordinate2D.ofChunk(targetChunk);
-
-        if (isAdjacent(claimCoords, targetCoords)) {
-            return true;
-        }
-
-        for (String landKey : lands) {
-            String[] coords = landKey.split(",");
-            if (coords.length >= 3) {
-                Coordinate2D landCoords = new Coordinate2D(Integer.parseInt(coords[1]), Integer.parseInt(coords[2]));
-
-                if (isAdjacent(landCoords, targetCoords)) return true;
-            }
-        }
-
-        return false;
+    public int size() {
+        return getAllChunks().size() + 1;
     }
 
-    private boolean isAdjacent(Coordinate2D coords1, Coordinate2D coords2) {
-        return (Math.abs(coords1.x() - coords2.x()) == 1 && coords1.z() == coords2.z())
-                || (coords1.x() == coords2.x() && Math.abs(coords1.z() - coords2.z()) == 1);
+    public boolean isChunkAdjacent(Chunk targetChunk) {
+        if (!targetChunk.getWorld().getName().equals(getChunk().getWorld().getName())) return false;
+
+        ClaimChunk targetClaimChunk = ClaimChunk.fromChunk(targetChunk);
+        return isAdjacent(ClaimChunk.fromChunk(chunk), targetClaimChunk)
+                || claimChunks.stream().anyMatch(chunk1 -> isAdjacent(chunk1, targetClaimChunk));
+    }
+
+    private boolean isAdjacent(ClaimChunk chunk1, ClaimChunk chunk2) {
+        return (Math.abs(chunk1.x() - chunk2.x()) == 1 && chunk1.z() == chunk2.z())
+                || (chunk1.x() == chunk2.x() && Math.abs(chunk1.z() - chunk2.z()) == 1);
     }
 }

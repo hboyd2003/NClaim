@@ -278,7 +278,7 @@ public class AdminAllClaimMenu extends BaseMenu {
                         .replace("{created_at}", NClaim.serializeDate(claim.getCreatedAt()))
                         .replace("{world}", chunk.getWorld().getName())
                         .replace("{coordinates}", NClaim.getCoordinates(chunk))
-                        .replace("{land_size}", String.valueOf(claim.getLands().size()))
+                        .replace("{land_size}", String.valueOf(claim.getClaimChunks().size()))
                         .replace("{coop_count}", String.valueOf(claim.getCoopPlayers().size()))
                         .replace("{yes}", String.valueOf(enabledSettings))
                         .replace("{no}", String.valueOf(disabledSettings)));

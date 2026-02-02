@@ -210,7 +210,7 @@ public class Expansion extends PlaceholderExpansion {
             case "expiration" -> plugin.getClaimExpirationManager().getFormattedTimeLeft(claim);
             case "owner" -> Bukkit.getOfflinePlayer(claim.getOwner()).getName() != null ? Bukkit.getOfflinePlayer(claim.getOwner()).getName() : "Owner not found";
             case "coop_count" -> String.valueOf(claim.getCoopPlayers().size());
-            case "total_size" -> String.valueOf(1 + claim.getLands().size());
+            case "total_size" -> String.valueOf(claim.size());
             case "claim_name" -> claim.getClaimName();
             case null, default -> "Unknown placeholder prefix: " + prefix;
         };

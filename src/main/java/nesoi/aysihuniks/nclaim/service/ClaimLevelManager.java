@@ -142,32 +142,17 @@ public class ClaimLevelManager {
         if (claim == null) return 0;
 
         long oldValue = claim.getClaimValue();
-
-        long totalValue = 0;
-        Chunk mainChunk = claim.getChunk();
-        totalValue += calculateChunkValue(mainChunk);
-
-        for (String landStr : claim.getLands()) {
-            String[] parts = landStr.split(",");
-            if (parts.length == 3) {
-                try {
-                    World world = Bukkit.getWorld(parts[0]);
-                    int x = Integer.parseInt(parts[1]);
-                    int z = Integer.parseInt(parts[2]);
-                    if (world != null) {
-                        Chunk landChunk = world.getChunkAt(x, z);
-                        totalValue += calculateChunkValue(landChunk);
-                    }
-                } catch (NumberFormatException ignored) {}
-            }
-        }
+        long totalValue = claim.getClaimChunks().stream()
+                .map(claimChunk -> claimChunk.toChunk(claim.getChunk().getWorld()))
+                .map(this::calculateChunkValue)
+                .mapToLong(value -> value)
+                .sum();
 
         ClaimCalculateLevelEvent event = new ClaimCalculateLevelEvent(claim, oldValue, totalValue);
         Bukkit.getPluginManager().callEvent(event);
 
-        if (event.isCancelled()) {
-            return event.getOldLevel();
-        }
+        if (event.isCancelled()) return event.getOldLevel();
+
         return event.getNewLevel();
     }
 
@@ -210,7 +195,7 @@ public class ClaimLevelManager {
 
         String message = NClaim.inst().getLangManager().getString("command.level.info")
                 .replace("{value}", String.format("%,d", claimValue))
-                .replace("{chunks}", String.valueOf(request.getClaim().getLands().size() + 1))
+                .replace("{chunks}", String.valueOf(request.getClaim().size()))
                 .replace("{time}", duration + "ms");
 
         sendMessageToPlayer(request.getPlayerId(), message);

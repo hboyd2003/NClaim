@@ -8,18 +8,15 @@ import java.util.*;
 @Getter
 @NoArgsConstructor
 public class CoopData {
-
-    private Collection<UUID> coopPlayers = new ArrayList<>();
+    private HashSet<UUID> coopPlayers = new HashSet<>();
     private HashMap<UUID, Date> joinDates = new HashMap<>();
     private HashMap<UUID, CoopPermission> permissions = new HashMap<>();
 
-    public CoopData(Collection<UUID> coopPlayers,
+    public CoopData(HashSet<UUID> coopPlayers,
                     HashMap<UUID, Date> joinDates,
                     HashMap<UUID, CoopPermission> permissions) {
         this.coopPlayers = coopPlayers;
         this.joinDates = joinDates;
         this.permissions = permissions;
     }
-
-
 }
