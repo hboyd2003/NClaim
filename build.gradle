@@ -82,6 +82,11 @@ repositories {
         name = "Modrinth"
         url = "https://api.modrinth.com/maven"
     }
+
+    maven {
+        name = "Lumine"
+        url = "https://mvn.lumine.io/repository/maven-public/"
+    }
 }
 
 dependencies {
@@ -101,6 +106,7 @@ dependencies {
     compileOnly(libs.vaultapi)
     compileOnly(libs.bstats)
     compileOnly(libs.enhancedpets)
+    compileOnly(libs.mythicmobs)
 
     implementation(libs.dapi)
     implementation(libs.anvilmenu)

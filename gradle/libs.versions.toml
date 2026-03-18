@@ -19,6 +19,7 @@ placeholderapi = "2.11.7"
 skinsrestorer-api = "15.8.2"
 bstats = "3.0.2"
 enhanced-pets = "1.1.0"
+mythicmobs = "5.6.1"
 
 [libraries]
 paperApi = { module = "io.papermc.paper:paper-api", version.ref = "paper-api" }
@@ -38,4 +39,5 @@ placeholderapi = { module = "me.clip:placeholderapi", version.ref = "placeholder
 skinsrestorerApi = { module = "net.skinsrestorer:skinsrestorer-api", version.ref = "skinsrestorer-api" }
 bstats = {module = "org.bstats:bstats-bukkit", version.ref = "bstats"}
 enhancedpets = {module = "maven.modrinth:enhancedpets", version.ref = "enhanced-pets"}
+mythicmobs = { module = "io.lumine:Mythic-Dist", version.ref = "mythicmobs" }
 

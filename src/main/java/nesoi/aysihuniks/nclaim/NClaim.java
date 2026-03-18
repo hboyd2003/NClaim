@@ -281,6 +281,7 @@ public final class NClaim extends JavaPlugin {
         setupAxsellwand();
         setupSmartSpawner();
         setupEnhancedPets();
+        setupMythicMobs();
     }
 
     private void setupAxsellwand() {
@@ -359,6 +360,13 @@ public final class NClaim extends JavaPlugin {
 
     private void setupMetrics() {
         Metrics metrics = new Metrics(this, 24693);
+    }
+
+    private void setupMythicMobs() {
+        if (getServer().getPluginManager().getPlugin("MythicMobs") != null) {
+            getServer().getPluginManager().registerEvents(new MythicMobs(), this);
+            Util.log("&MythicMobs integration enabled successfully!");
+        }
     }
 
 
