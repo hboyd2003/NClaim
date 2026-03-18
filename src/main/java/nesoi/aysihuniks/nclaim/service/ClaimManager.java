@@ -362,7 +362,7 @@ public class ClaimManager implements Listener {
         Optional<Claim> claim = Claim.getClaim(event.getLocation().getChunk());
         if (claim.isEmpty()) return;
 
-        Setting setting = event.getEntity() instanceof Monster ? Setting.MONSTER_SPAWNING : Setting.ANIMAL_SPAWNING;
+        Setting setting = event.getEntity() instanceof Enemy ? Setting.MONSTER_SPAWNING : Setting.ANIMAL_SPAWNING;
         if (!plugin.getClaimSettingsManager().isSettingEnabled(claim.get(), setting)) {
             event.setCancelled(true);
         }
