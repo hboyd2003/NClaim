@@ -261,7 +261,7 @@ public class CoopPermissionsMenu extends BaseMenu {
                                 player.closeInventory();
                                 claim.setOwner(coopPlayer.getUniqueId());
                                 player.sendMessage(NClaim.inst().getLangManager().getString("claim.transferred")
-                                        .replace("{target}", coopPlayer.getName() != null ? coopPlayer.getName() : "Unknown"));
+                                        .replace("{player}", coopPlayer.getName() != null ? coopPlayer.getName() : "Unknown"));
                             } else if ("declined".equals(result)) {
                                 new CoopPermissionsMenu(player, coopPlayer, claim, admin, currentCategory);
                             }
